@@ -1,0 +1,35 @@
+---
+title: "ML Model Explanation"
+author: "Benjamin Romeu"
+date: "13/05/2019"
+output: html_document
+---
+
+## Machine Learning Model Explanation
+
+### k-nearest neighbors algorithm (k-NN) for classification
+
+A k-nearest-neighbor is a data classification algorithm that attempts to determine what group a data point is in by looking at the data points around it.
+
+An algorithm, looking at one point on a grid, trying to determine if a point is in group A or B, looks at the states of the points that are near it. The range is arbitrarily determined, but the point is to take a sample of the data. If the majority of the points are in group A, then it is likely that the data point in question will be A rather than B, and vice versa.
+
+The k-nearest-neighbor is an example of a "lazy learner" algorithm because it does not generate a model of the data set beforehand. The only calculations it makes are when it is asked to poll the data point's neighbors. This makes k-nn very easy to implement for data mining.
+
+Source: https://www.techopedia.com/definition/32066/k-nearest-neighbor-k-nn
+
+![](http://res.cloudinary.com/dyd911kmh/image/upload/f_auto,q_auto:best/v1531424125/KNN_final1_ibdm8a.png)
+
+
+### Decision Trees for classification
+
+
+
+
+
+
+
+
+
+
+
+
