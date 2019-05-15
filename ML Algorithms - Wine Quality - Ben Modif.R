@@ -135,7 +135,7 @@ train_arg <- train[,1:11]
 test_arg <- test[,1:11]
 
 # kNN Model
-n <- 200
+n <- 80
 wines_knn_pred <- list()
 knn_confmatrix <- list()
 for(i in 1:n){
@@ -199,10 +199,10 @@ wines_knn_pred_z <- knn(train = train_z, test = test_z,
 #### Machine Learning Algorithm : Classification with Decision Trees ####
 
 # Define if Classification Tree or Rule-based Tree
-rules <- FALSE
+rules <- FALSE#********* RULE = FALSE ******************
 
 # C5.0 Algorithm : classification Tree or Rule-based Tree
-c <- 100
+c <- 40
 tree <- list()
 tree_pred <- list()
 tree_confmatrix <- list()
@@ -256,6 +256,65 @@ roc(response = test_labels, predictor = tree_min_FN , plot = T, percent = T, pri
 legend("bottomright", legend = c("Max Accuracy", "Min False Positive", "Min False Negative"), 
        col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
 
+
+
+# Define if Classification Tree or Rule-based Tree
+rules <- TRUE#********* RULE = TRUE ******************
+
+# C5.0 Algorithm : classification Tree or Rule-based Tree
+c <- 40
+treeT <- list()
+treeT_pred <- list()
+treeT_confmatrix <- list()
+for(i in 1:c){
+  print(i)
+  treeT[[i]] <- C5.0(train[-12], train$label, trials = i, weights = NULL, costs = NULL, rules = rules)
+  treeT_pred[[i]] <- predict(treeT[[i]], test, type = "class")
+  treeT_confmatrix[[i]] <- confusionMatrix(treeT_pred[[i]], reference = test_labels)
+}
+treeT_confmatrix[[1]]
+treeT_confmatrix[[10]]
+
+# Create Matrix of results for all models
+treeT_FNFP <- matrix(NA, nrow = c, ncol = 3)
+colnames(treeT_FNFP) <- c("Accuracy","FP (Type I error)","FN (Type II error)")
+for(i in 1:c){
+  treeT_FNFP[i,1] <- round(treeT_confmatrix[[i]]$overall[1],3)
+}
+for(i in 1:c){
+  treeT_FNFP[i,2] <- treeT_confmatrix[[i]]$table[1,2]
+}
+for(i in 1:c){
+  treeT_FNFP[i,3] <- treeT_confmatrix[[i]]$table[2,1]
+}
+treeT_FNFP
+
+# Compute most accurate / Min FP / Min FN
+(treeT_max_acc <- min(which(treeT_FNFP == max(treeT_FNFP[,1]))))
+(treeT_min_FP <- min(treeT_FNFP[,2]))
+(treeT_min_FP <- which(treeT_FNFP==treeT_min_FP, arr.ind=TRUE)[1])
+(treeT_min_FN <- min(treeT_FNFP[,3]))
+(treeT_min_FN <- which(treeT_FNFP==treeT_min_FN, arr.ind=TRUE)[1])
+
+# Compute predictions for most accurate / Min FP / Min FN models with Probabilities Output
+treeT_max_acc <- predict(treeT[[treeT_max_acc]], test, type = "prob")
+treeT_max_acc <- treeT_max_acc[,2]
+treeT_min_FP <- predict(treeT[[treeT_min_FP]], test, type = "prob")
+treeT_min_FP <- treeT_min_FP[,2]
+treeT_min_FN <- predict(treeT[[treeT_min_FN]], test, type = "prob")
+treeT_min_FN <- treeT_min_FN[,2]
+
+# ROC Curve (Receiver Operating Characteristic) & AUC
+par(pty="s")
+roc(response = test_labels, predictor = treeT_max_acc , main=" Decision Trees with  variable Trials",
+    plot=T,legacy.axes=T,percent=T,print.auc=T,
+    xlab="% False Positive", ylab="% True Positive", col="dodgerblue3",lwd = 2)
+roc(response = test_labels, predictor = treeT_min_FP, plot = T, percent = T, print.auc = T,
+    col="#4daf4a", lwd=2, add=T, print.auc.y=40)
+roc(response = test_labels, predictor = treeT_min_FN , plot = T, percent = T, print.auc = T,
+    col="orange", lwd=2, add=T, print.auc.y=30)
+legend("bottomright", legend = c("Max Accuracy", "Min False Positive", "Min False Negative"), 
+       col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
 
 #-----------------------------------------------------------------------------------------------------
 #### Machine Learning Algorithm : Decision Trees : Recursive Partitioning ####
@@ -364,15 +423,12 @@ legend("bottomright", legend = c("Max Accuracy", "Min False Positive", "Min Fals
 
 # ANN MLP Model
 model.mlp = list()
-a = 1;
-for(i in 1:1){
-  for(j in 0:0){
-    print(paste("i = ", i, "j = ", j))
-    if(j == 0){model.mlp[[a]] = neuralnet(label ~.,data = wines_n, hidden = i, linear.output = FALSE)}#end of if statement
-    else{model.mlp = neuralnet(label ~.,data = wines_n, hidden = c(i,j), linear.output = FALSE)}#end of else statement
-    a = a+1;#increment a
-  }#end of second for loop
-}#end of first for loop
+print(1)
+model.mlp[[1]] = neuralnet(label ~.,data = wines_n, hidden = 1, linear.output = FALSE)
+print(2)
+model.mlp[[2]] = neuralnet(label ~.,data = wines_n, hidden = 2, linear.output = FALSE)
+print(3)
+model.mlp[[3]] = neuralnet(label ~.,data = wines_n, hidden = 3, linear.output = FALSE)
 
 #plot ANN
 par(pty="s")
@@ -380,19 +436,57 @@ plot.nnet(model.mlp[[1]])
 plot(model.mlp[[1]])
 
 # Table predictions & accuracy
-model.mlp.results <- predict(model.mlp[[1]], test[1:11])
-model.mlp.predicted.label = ifelse(model.mlp.results[,2]>0.5,"Good","Bad")
-model.mlp.predicted.label = data.frame(keyName=names(model.mlp.predicted.label), value=model.mlp.predicted.label, row.names=NULL)
-confusionMatrix(model.mlp.predicted.label[,2], reference = test$label)
+#model.mlp.results <- predict(model.mlp[[1]], test[1:11])
+#model.mlp.predicted.label = ifelse(model.mlp.results[,2]>0.5,"Good","Bad")
+#model.mlp.predicted.label = data.frame(keyName=names(model.mlp.predicted.label), value=model.mlp.predicted.label, row.names=NULL)
+#confusionMatrix(model.mlp.predicted.label[,2], reference = test$label)
 
-model.mlp_prob <- predict(model.mlp, test, type ="prob")[,2]
+#•model.mlp_prob <- predict(model.mlp[[1]], test, type ="prob")[,2]
 # ROC & AUC
-roc(response = test_labels, predictor = model.mlp_prob, plot = T, legacy.axes = T, 
-    percent = T, xlab="% False Positive", ylab="% True Positive", print.auc=T,
-    col="red",lwd = 4)
-legend("bottomright", legend = c("ANN MLP"), 
-       col= c("red"), lwd=4)
+#roc(response = test_labels, predictor = model.mlp_prob, plot = T, legacy.axes = T, 
+ #   percent = T, xlab="% False Positive", ylab="% True Positive", print.auc=T,
+#    col="red",lwd = 4)
+#legend("bottomright", legend = c("ANN MLP"), 
+#       col= c("red"), lwd=4)
 
+
+# Create Matrix of results for all models
+ANN_FNFP <- matrix(NA, nrow = n, ncol = 3)
+colnames(ANN_FNFP) <- c("Accuracy","FP (Type I error)","FN (Type II error)")
+for(i in 1:n){
+  ANN_FNFP[i,1] <- round(ANN_confmatrix[[i]]$overall[1],3)
+}
+for(i in 1:n){
+  ANN_FNFP[i,2] <- ANN_confmatrix[[i]]$table[1,2]
+}
+for(i in 1:n){
+  ANN_FNFP[i,3] <- ANN_confmatrix[[i]]$table[2,1]
+}
+ANN_FNFP
+
+# Compute most accurate / Min FP / Min FN
+(ANN_max_acc <- min(which(ANN_FNFP == max(ANN_FNFP[,1]))))
+(ANN_min_FP <- min(ANN_FNFP[,2]))
+(ANN_min_FP <- which(ANN_FNFP==ANN_min_FP, arr.ind=TRUE)[1])
+(ANN_min_FN <- min(ANN_FNFP[,3]))
+(ANN_min_FN <- which(ANN_FNFP==ANN_min_FN, arr.ind=TRUE)[1])
+
+# ROC Curve for the three above models
+ANN_max_acc_prob <- attr(wines_ANN_pred[[ANN_max_acc]], "prob")
+ANN_FP_prob <- attr(wines_ANN_pred[[ANN_min_FP]], "prob")
+ANN_FN_prob <- attr(wines_ANN_pred[[ANN_min_FN]], "prob")
+
+# ROC Curve (Receiver Operating Characteristic) & AUC
+par(pty="s")
+roc(response = test_labels, predictor =  ANN_max_acc_prob, main="ANN with variable k values",
+    plot=T,legacy.axes=T,percent=T,print.auc=T,
+    xlab="% False Positive", ylab="% True Positive", col="dodgerblue3",lwd = 2)
+roc(response = test_labels, predictor = ANN_FP_prob, plot = T, percent = T, print.auc = T,
+    col="#4daf4a", lwd=2, add=T, print.auc.y=40)
+roc(response = test_labels, predictor = ANN_FN_prob , plot = T, percent = T, print.auc = T,
+    col="orange", lwd=2, add=T, print.auc.y=30)
+legend("bottomright", legend = c("Max Accuracy", "Min False Positive", "Min False Negative"), 
+       col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
 
 #-----------------------------------------------------------------------------------------------------
 #### ROC & AUC Comparison between Models ####
@@ -411,7 +505,7 @@ roc(response = test_labels, predictor=rf_max_acc, plot = T,percent = T, print.au
     col="orange", lwd=2, print.auc.x=25, print.auc.y=55)
 
 # Plot most accurate of AAN
-roc(response = test_labels, predictor = model.mlp_prob, plot = T, 
+roc(response = test_labels, predictor = ANN_max_acc_prob, plot = T, 
     percent = T, print.auc=T, add=T,
     col="red",lwd = 2, print.auc.x=25, print.auc.y=47)
 

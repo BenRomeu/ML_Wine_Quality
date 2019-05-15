@@ -55,7 +55,7 @@ library(devtools)
 library(shiny)
 
   #### Load database of red wines and white wines ####
-  load(paste(getwd(),"/data_set_3.RData", sep = ""), envir = parent.frame(), verbose = FALSE)
+  load(paste(getwd(),"/data_set.RData", sep = ""), envir = parent.frame(), verbose = FALSE)
 
 #-----------------------------------------------------------------------------------------------------
 #### Shiny App
@@ -81,16 +81,16 @@ ui <- fluidPage(
                               "Number of groups",
                               step = 1,
                               min = 1,
-                              max = 200,
-                              value = 100),
+                              max = 80,
+                              value = 1),
                   
                   em("Decision Trees"),
                   sliderInput("decision_trees",
                               "Number of trees",
                               step = 1,
                               min = 1,
-                              max = 100,
-                              value = 50),
+                              max = 40,
+                              value = 1),
                   radioButtons("rule",
                                "RULE or NO RULE",
                                inline = TRUE,
@@ -102,42 +102,25 @@ ui <- fluidPage(
                               "Minimum split",
                               step = 1,
                               min = 1,
-                              max = 500,
-                              value = 250),
+                              max = 10,
+                              value = 1),
                   
                   em("Random Forest"),
                   sliderInput("random_forest",
                               "Number of random variables",
                               step = 1,
                               min = 1,
-                              max = 100,
-                              value = 50),
+                              max = 10,
+                              value = 1),
                   
                   em("ANN MLP"),
                   radioButtons("ANN_MLP",
                               "Number of neurons",
                               inline = TRUE,
-                              choices = c("1" = 1,"1x1" = 2,"1x2" = 3,"2" = 4,"2x1" = 5,"2x2" = 6)),
+                              choices = c("1" = 1,"2" = 2, "3" = 3))
                   
-                  
-                  #########################################TEST YOUR OWN WINE
-                  
-                  h3("Test your own wine"),
-                  p("Suppose you are given a wine with defined acidity, residual sugar, and so on.
-                    But you can adjust the amount of alcohol and the density of the wine."),
-                  strong("Here, you can create your own wine and see if it's good or not!"),
-                  strong("Just adjust the quantity of alcohol and the density of the wine.
-                         The algorithms will do the rest of the work."),
-                  p(""),
-                  
-                  sliderInput("alcohol",
-                              "Alcohol quantity",
-                              step = 1,
-                              min = 8,
-                              max = 15,
-                              value = 12)
 
-      ),#end of
+      ),#end of sideBar Panel
       
 
     
