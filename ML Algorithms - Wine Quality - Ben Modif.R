@@ -159,16 +159,16 @@ for(i in 1:n){
 knn_FNFP
 
 # Compute most accurate / Min FP / Min FN
-(knn_max_acc <- min(which(knn_FNFP == max(knn_FNFP[,1]))))
-(knn_min_FP <- min(knn_FNFP[,2]))
-(knn_min_FP <- which(knn_FNFP==knn_min_FP, arr.ind=TRUE)[1])
-(knn_min_FN <- min(knn_FNFP[,3]))
-(knn_min_FN <- which(knn_FNFP==knn_min_FN, arr.ind=TRUE)[1])
+(knn_max_acc_i <- min(which(knn_FNFP == max(knn_FNFP[,1]))))
+(knn_min_FP_i <- min(knn_FNFP[,2]))
+(knn_min_FP_i <- which(knn_FNFP==knn_min_FP_i, arr.ind=TRUE)[1])
+(knn_min_FN_i <- min(knn_FNFP[,3]))
+(knn_min_FN_i <- which(knn_FNFP==knn_min_FN_i, arr.ind=TRUE)[1])
 
 # ROC Curve for the three above models
-knn_max_acc_prob <- attr(wines_knn_pred[[knn_max_acc]], "prob")
-knn_FP_prob <- attr(wines_knn_pred[[knn_min_FP]], "prob")
-knn_FN_prob <- attr(wines_knn_pred[[knn_min_FN]], "prob")
+knn_max_acc_prob <- attr(wines_knn_pred[[knn_max_acc_i]], "prob")
+knn_FP_prob <- attr(wines_knn_pred[[knn_min_FP_i]], "prob")
+knn_FN_prob <- attr(wines_knn_pred[[knn_min_FN_i]], "prob")
 
 # ROC Curve (Receiver Operating Characteristic) & AUC
 par(pty="s")
@@ -292,18 +292,18 @@ for(i in 1:c){
 treeT_FNFP
 
 # Compute most accurate / Min FP / Min FN
-(treeT_max_acc <- min(which(treeT_FNFP == max(treeT_FNFP[,1]))))
-(treeT_min_FP <- min(treeT_FNFP[,2]))
-(treeT_min_FP <- which(treeT_FNFP==treeT_min_FP, arr.ind=TRUE)[1])
-(treeT_min_FN <- min(treeT_FNFP[,3]))
-(treeT_min_FN <- which(treeT_FNFP==treeT_min_FN, arr.ind=TRUE)[1])
+(treeT_max_acc_i <- min(which(treeT_FNFP == max(treeT_FNFP[,1]))))
+(treeT_min_FP_i <- min(treeT_FNFP[,2]))
+(treeT_min_FP_i <- which(treeT_FNFP==treeT_min_FP_i, arr.ind=TRUE)[1])
+(treeT_min_FN_i <- min(treeT_FNFP[,3]))
+(treeT_min_FN_i <- which(treeT_FNFP==treeT_min_FN_i, arr.ind=TRUE)[1])
 
 # Compute predictions for most accurate / Min FP / Min FN models with Probabilities Output
-treeT_max_acc <- predict(treeT[[treeT_max_acc]], test, type = "prob")
+treeT_max_acc <- predict(treeT[[treeT_max_acc_i]], test, type = "prob")
 treeT_max_acc <- treeT_max_acc[,2]
-treeT_min_FP <- predict(treeT[[treeT_min_FP]], test, type = "prob")
+treeT_min_FP <- predict(treeT[[treeT_min_FP_i]], test, type = "prob")
 treeT_min_FP <- treeT_min_FP[,2]
-treeT_min_FN <- predict(treeT[[treeT_min_FN]], test, type = "prob")
+treeT_min_FN <- predict(treeT[[treeT_min_FN_i]], test, type = "prob")
 treeT_min_FN <- treeT_min_FN[,2]
 
 # ROC Curve (Receiver Operating Characteristic) & AUC
@@ -393,18 +393,18 @@ for(i in 1:r){
 rf_FNFP
 
 # Compute most accurate / Min FP / Min FN
-(rf_max_acc <- min(which(rf_FNFP == max(rf_FNFP[,1]))))
-(rf_min_FP <- min(rf_FNFP[,2]))
-(rf_min_FP <- min(which(rf_FNFP==rf_min_FP, arr.ind=TRUE)[1]))
-(rf_min_FN <- min(rf_FNFP[,3]))
-(rf_min_FN <- min(which(rf_FNFP==rf_min_FN, arr.ind=TRUE)[1]))
+(rf_max_acc_i <- min(which(rf_FNFP == max(rf_FNFP[,1]))))
+(rf_min_FP_i <- min(rf_FNFP[,2]))
+(rf_min_FP_i <- min(which(rf_FNFP==rf_min_FP_i, arr.ind=TRUE)[1]))
+(rf_min_FN_i <- min(rf_FNFP[,3]))
+(rf_min_FN_i <- min(which(rf_FNFP==rf_min_FN_i, arr.ind=TRUE)[1]))
 
 # Compute predictions for most accurate / Min FP / Min FN models with Probabilities Output
-rf_max_acc <- predict(rf[[rf_max_acc]], test, type = "prob")
+rf_max_acc <- predict(rf[[rf_max_acc_i]], test, type = "prob")
 rf_max_acc <- rf_max_acc[,2]
-rf_min_FP <- predict(rf[[rf_min_FP]], test, type = "prob")
+rf_min_FP <- predict(rf[[rf_min_FP_i]], test, type = "prob")
 rf_min_FP <- rf_min_FP[,2]
-rf_min_FN <- predict(rf[[rf_min_FN]], test, type = "prob")
+rf_min_FN <- predict(rf[[rf_min_FN_i]], test, type = "prob")
 rf_min_FN <- rf_min_FN[,2]
 
 # ROC Curve (Receiver Operating Characteristic) & AUC
@@ -536,9 +536,9 @@ rownames(results) <- c("False Positive (Type I error)","False Negative (Type II 
                        "True Positive","True Negative")
 results
 
-(knn_comp <- knn_confmatrix[[knn_max_acc]])
-(tree_comp <- tree_confmatrix[[tree_max_acc]])
-(rf_comp <- rf_confmatrix[[rf_max_acc]])
+(knn_comp <- knn_confmatrix[[knn_max_acc_i]])
+(tree_comp <- tree_confmatrix[[tree_max_acc_i]])
+(rf_comp <- rf_confmatrix[[rf_max_acc_i]])
 
 results[1,1] <- knn_comp$table[1,2]
 results[2,1] <- knn_comp$table[2,1]

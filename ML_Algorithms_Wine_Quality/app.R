@@ -178,7 +178,19 @@ server <- function(input, output) {
             col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
    })#end of output$knn
    
-   output$random_forest = renderPlot({})#end of output$random_forest
+   output$random_forest = renderPlot({
+     # ROC Curve (Receiver Operating Characteristic) & AUC
+     par(pty="s")
+     roc(response = test_labels, predictor = rf_max_acc , main=" RandomForest with variable Mtry",
+         plot=T,legacy.axes=T,percent=T,print.auc=T,
+         xlab="% False Positive", ylab="% True Positive", col="dodgerblue3",lwd = 2)
+     roc(response = test_labels, predictor = rf_min_FP, plot = T, percent = T, print.auc = T,
+         col="#4daf4a", lwd=2, add=T, print.auc.y=40)
+     roc(response = test_labels, predictor = rf_min_FN , plot = T, percent = T, print.auc = T,
+         col="orange", lwd=2, add=T, print.auc.y=30)
+     legend("bottomright", legend = c("Max Accuracy", "Min False Positive", "Min False Negative"), 
+            col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
+   })#end of output$random_forest
    
    output$decision_trees = renderPlot({
      # ROC Curve (Receiver Operating Characteristic) & AUC
@@ -196,8 +208,6 @@ server <- function(input, output) {
             col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
    })#end of output$decision_trees
    ########## END OF MODELS COMPARISONS #####
-   
-   output$RPART = renderPlot({})#end of output$RPART
    
    output$ANN_MLP = renderPlot({})#end of output$ANN_MLP
    
@@ -292,15 +302,32 @@ server <- function(input, output) {
                    strong("Twiggle the buttons to see how iterations have an impact on the final graph"),
                    plotOutput("MLcomparison"),
                    
+                   fluidRow(
+                     column(12,
+                            tableOutput('table')
+                     )
+                   ),
+                   
                    h2("Comparison bewteen models"),
+                   h4("Most accurate models"),
                    p("The graph below shows the most accurate models."),
                    plotOutput("ML_most_accurate"),
-                   h3("kNN"),
+                   
+                   h4("kNN"),
                    p("The graph below shows different variations of kNN."),
                    plotOutput("knn"),
-                   h3("Decision trees"),
+                   
+                   h4("Decision trees"),
                    p("The graph below shows different variations of a decision tree."),
-                   plotOutput("decision_trees")
+                   plotOutput("decision_trees"),
+                   
+                   h4("Random Forest"),
+                   p("The graph below shows different variations of Random Forest"),
+                   plotOutput("random_forest")
+                   
+                   #h4("ANN MLP"),
+                   #p("The graph below shows different variations of ANN MLP"),
+                   #plotOutput("ANN")
                  )# end of main panel
                )# end of sidebar layout
            })#end of output$Demonstration
@@ -310,6 +337,30 @@ server <- function(input, output) {
                HTML(markdown::markdownToHTML(knit('ML Model Explanation.rmd', quiet = TRUE)))
              )#end of mainPanel
            })# end of output$Model_Explanation
+           
+           output$mytable = DT::renderDataTable({
+             
+             (knn_comp <- knn_confmatrix[[input$knn]])
+             (tree_comp <- tree_confmatrix[[input$]])
+             (rf_comp <- rf_confmatrix[[input$]])
+             
+             results[1,1] <- knn_comp$table[1,2]
+             results[2,1] <- knn_comp$table[2,1]
+             results[3,1] <- knn_comp$table[1,1]
+             results[4,1] <- knn_comp$table[2,1]
+             results
+             results[1,2] <- tree_comp$table[1,2]
+             results[2,2] <- tree_comp$table[2,1]
+             results[3,2] <- tree_comp$table[1,1]
+             results[4,2] <- tree_comp$table[2,1]
+             results
+             results[1,3] <- rf_comp$table[1,2]
+             results[2,3] <- rf_comp$table[2,1]
+             results[3,3] <- rf_comp$table[1,1]
+             results[4,3] <- rf_comp$table[2,1]
+             results
+             results <- as.data.frame((results))
+           })#end of output$mytable
    
    ####****#### END OF TABS FUNCTIONS ####****####
 }#end of server

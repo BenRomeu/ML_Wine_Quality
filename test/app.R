@@ -8,43 +8,43 @@
 #
 
 library(shiny)
+library(DT)
+
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
+  
+  DT::dataTableOutput("mytable")
+  
    
-   # Application title
-   titlePanel("Old Faithful Geyser Data"),
-   
-   (textOutput("caption")),
-   
-   # Sidebar with a slider input for number of bins 
-   sidebarLayout(
-      sidebarPanel(
-         sliderInput("bins",
-                     "Number of bins:",
-                     min = 1,
-                     max = 50,
-                     value = 30)
-      ),
-      
-      # Show a plot of the generated distribution
-      mainPanel(
-         plotOutput("distPlot")
-      )
-   )
-)
+  )
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
    
-   output$distPlot <- renderPlot({
-      # generate bins based on input$bins from ui.R
-      x    <- faithful[, 2] 
-      bins <- seq(min(x), max(x), length.out = input$bins + 1)
-      
-      # draw the histogram with the specified number of bins
-      hist(x, breaks = bins, col = 'darkgray', border = 'white')
-   })
+  output$mytable = DT::renderDataTable({
+    
+    (knn_comp <- knn_confmatrix[[5]])
+    (tree_comp <- tree_confmatrix[[5]])
+    (rf_comp <- rf_confmatrix[[5]])
+    
+    results[1,1] <- knn_comp$table[1,2]
+    results[2,1] <- knn_comp$table[2,1]
+    results[3,1] <- knn_comp$table[1,1]
+    results[4,1] <- knn_comp$table[2,1]
+    results
+    results[1,2] <- tree_comp$table[1,2]
+    results[2,2] <- tree_comp$table[2,1]
+    results[3,2] <- tree_comp$table[1,1]
+    results[4,2] <- tree_comp$table[2,1]
+    results
+    results[1,3] <- rf_comp$table[1,2]
+    results[2,3] <- rf_comp$table[2,1]
+    results[3,3] <- rf_comp$table[1,1]
+    results[4,3] <- rf_comp$table[2,1]
+    results
+    results <- as.data.frame((results))
+  })#end of output$mytable
 }
 
 # Run the application 
