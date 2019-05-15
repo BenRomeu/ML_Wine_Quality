@@ -423,12 +423,17 @@ legend("bottomright", legend = c("Max Accuracy", "Min False Positive", "Min Fals
 
 # ANN MLP Model
 model.mlp = list()
-print(1)
-model.mlp[[1]] = neuralnet(label ~.,data = wines_n, hidden = 1, linear.output = FALSE)
-print(2)
-model.mlp[[2]] = neuralnet(label ~.,data = wines_n, hidden = 2, linear.output = FALSE)
-print(3)
-model.mlp[[3]] = neuralnet(label ~.,data = wines_n, hidden = 3, linear.output = FALSE)
+wines_ANN_pred <- list()
+ANN_confmatrix <- list()
+a=1
+print(a)
+model.mlp[[1]] = neuralnet(label ~.,data = wines_n, hidden = a, linear.output = FALSE)
+a = a+1
+print(a)
+model.mlp[[2]] = neuralnet(label ~.,data = wines_n, hidden = a, linear.output = FALSE)
+a = a+1
+print(a)
+model.mlp[[3]] = neuralnet(label ~.,data = wines_n, hidden = a, linear.output = FALSE)
 
 #plot ANN
 par(pty="s")
@@ -448,18 +453,24 @@ plot(model.mlp[[1]])
 #    col="red",lwd = 4)
 #legend("bottomright", legend = c("ANN MLP"), 
 #       col= c("red"), lwd=4)
-
+for(i in 2:a){
+  print(i)
+  wines_ANN_pred[[i]] <- predict(model.mlp[[i]], test, prob = F)
+#  model.mlp.predicted.label = ifelse(model.mlp.results[,2]>0.5,"Good","Bad")
+#  model.mlp.predicted.label = ifelse(wines_ANN_pred[[1]]>0.5,"Good","Bad")
+  ANN_confmatrix[[i]] <- confusionMatrix(wines_ANN_pred[[i]], reference = test_labels)
+}
 
 # Create Matrix of results for all models
-ANN_FNFP <- matrix(NA, nrow = n, ncol = 3)
+ANN_FNFP <- matrix(NA, nrow = a, ncol = 3)
 colnames(ANN_FNFP) <- c("Accuracy","FP (Type I error)","FN (Type II error)")
-for(i in 1:n){
+for(i in 1:a){
   ANN_FNFP[i,1] <- round(ANN_confmatrix[[i]]$overall[1],3)
 }
-for(i in 1:n){
+for(i in 1:a){
   ANN_FNFP[i,2] <- ANN_confmatrix[[i]]$table[1,2]
 }
-for(i in 1:n){
+for(i in 1:a){
   ANN_FNFP[i,3] <- ANN_confmatrix[[i]]$table[2,1]
 }
 ANN_FNFP

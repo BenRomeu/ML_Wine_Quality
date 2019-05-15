@@ -29,8 +29,10 @@ if(FALSE){
   install.packages("rattle")
   install.packages("ROCR")  
   install.packages("pROC")
+  install.packages("knitr")
 }#end of if statement
 
+library(knitr)
 library(ROCR)
 library(pROC)
 library(ggplot2)
@@ -53,6 +55,7 @@ library(C50)
 library(devtools)
   source_url('https://gist.githubusercontent.com/fawda123/7471137/raw/466c1474d0a505ff044412703516c34f1a4684a5/nnet_plot_update.r')
 library(shiny)
+library(shinyjs)
 
   #### Load database of red wines and white wines ####
   load(paste(getwd(),"/data_set.RData", sep = ""), envir = parent.frame(), verbose = FALSE)
@@ -66,92 +69,12 @@ ui <- fluidPage(
    # Application title
    titlePanel("Machine Learning Algorithms - How To Predict Wine Quality"),
    
-   # Sidebar with a slider input for number of bins 
-   sidebarLayout(
-     
-      sidebarPanel(
-                   #########################################TEST DIFFERENT MODELS
-                  h3("Test different models"),
-                  p("Machine Learning models learn. But you can tell them how much to lear."),
-                  strong("Here, you can try out different variations of our models."),
-                  p(""),
-                  
-                  em("KNN"),
-                  sliderInput("knn",
-                              "Number of groups",
-                              step = 1,
-                              min = 1,
-                              max = 80,
-                              value = 1),
-                  
-                  em("Decision Trees"),
-                  sliderInput("decision_trees",
-                              "Number of trees",
-                              step = 1,
-                              min = 1,
-                              max = 40,
-                              value = 1),
-                  radioButtons("rule",
-                               "RULE or NO RULE",
-                               inline = TRUE,
-                               choiceNames = c("RULE", "NO RULE"),
-                               choiceValues = c(TRUE, FALSE)),
-                  
-                  em("RPART"),
-                  sliderInput("RPART",
-                              "Minimum split",
-                              step = 1,
-                              min = 1,
-                              max = 10,
-                              value = 1),
-                  
-                  em("Random Forest"),
-                  sliderInput("random_forest",
-                              "Number of random variables",
-                              step = 1,
-                              min = 1,
-                              max = 10,
-                              value = 1),
-                  
-                  em("ANN MLP"),
-                  radioButtons("ANN_MLP",
-                              "Number of neurons",
-                              inline = TRUE,
-                              choices = c("1" = 1,"2" = 2, "3" = 3))
-                  
-
-      ),#end of sideBar Panel
-      
-
-    
-      
-      # Show a plot of the generated distribution
-      mainPanel(
-        
-        h1("What is Machine Learning?"),
-        p("Explain purpose of project here"),
-        
-        strong("Please be patient when you twiggle the buttons. Every Machine Learning model needs to be trained.
-               Depending on your computer, this can take a few seconds up to a few minutes."),
-        
-        h2("Data Analysis"),
-        
-        #plotOutput("data_analysis"),
-        
-        
-        h2("Machine Learning Models"),
-        p("This graph compares the efficiency of different models"),
-        plotOutput("MLcomparison"),
-        
-        h2("Test my own wine")
-        #textOutput("my_wine_prediction")
-
-        
-        
-        #plotOutput("MLPplot")
-      )
-   )
-)
+   tabsetPanel(id = "tabSelected",
+               tabPanel("Demonstration", uiOutput("Demonstration")),
+               tabPanel("Model Explanation", uiOutput("Model_Explanation"))
+   )#end of tabsetPanel
+   
+)# end of ui fluidpage
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
@@ -251,8 +174,66 @@ server <- function(input, output) {
    
    output$ANN_MLP = renderPlot({})#end of output$ANN_MLP
    
+   output$Demonstration <- renderUI({
+       sidebarLayout(
+         sidebarPanel(
+           #########################################TEST DIFFERENT MODELS
+           h3("Test different models"),
+           p("Machine Learning models learn. But you can tell them how much to lear."),
+           strong("Here, you can try out different variations of our models."),
+           p(""),
+           
+           em("KNN"),
+           sliderInput("knn",
+                       "Number of groups",
+                       step = 1,
+                       min = 1,
+                       max = 80,
+                       value = 1),
+           
+           em("Decision Trees"),
+           sliderInput("decision_trees",
+                       "Number of trees",
+                       step = 1,
+                       min = 1,
+                       max = 40,
+                       value = 1),
+           radioButtons("rule",
+                        "RULE or NO RULE",
+                        inline = TRUE,
+                        choiceNames = c("RULE", "NO RULE"),
+                        choiceValues = c(TRUE, FALSE)),
+           
+           em("Random Forest"),
+           sliderInput("random_forest",
+                       "Number of random variables",
+                       step = 1,
+                       min = 1,
+                       max = 10,
+                       value = 1),
+           
+           em("ANN MLP"),
+           radioButtons("ANN_MLP",
+                        "Number of neurons",
+                        inline = TRUE,
+                        choices = c("1" = 1,"2" = 2, "3" = 3))
+         ),#end of sideBar Panel
+         
+         mainPanel(
+           h2("Data Analysis"),
+           p("This graph compares the efficiency of different models"),
+           plotOutput("MLcomparison")
+         )# end of main panel
+       )# end of sidebar layout
+   })#end of output$Demonstration
+   
+   output$Model_Explanation <- renderUI({
+     mainPanel(
+       #uiOutput('markdown')
+       HTML(markdown::markdownToHTML(knit('ML Model Explanation.rmd', quiet = TRUE)))
+     )#end of mainPanel
+   })# end of output$Model_Explanation
+   
 }#end of server
-
 # Run the application 
 shinyApp(ui = ui, server = server)
-

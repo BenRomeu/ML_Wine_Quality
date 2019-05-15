@@ -30,7 +30,7 @@ that denote the result of following a combination of decisions.
 
 ![](https://datastudentblog.files.wordpress.com/2014/01/redwinedtree.png)
 
-####Random Forest#####
+### Random Forest
 
 Random forests are an ensemble learning method for classification, regression and other tasks that operate by constructing a multitude of decision trees at training time and outputting the class that is the mode of the classes (classification) or mean prediction (regression) of the individual trees. Random decision forests correct for decision trees’ habit of overfitting to their training set.
 
@@ -41,7 +41,7 @@ The training algorithm for random forests applies the general technique of boots
 
 
 
-#### Aritificial Nueral Network####
+### Aritificial Nueral Network
 
 An Artificial Neural Network (ANN) models the relationship between a set of input
 signals and an output signal using a model derived from our understanding of how
