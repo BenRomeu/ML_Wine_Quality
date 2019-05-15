@@ -53,6 +53,17 @@ the ANN uses a network of artificial neurons or nodes to solve learning problems
 
 
 
+### Random Partioning (RPART)
+
+Text Donika
+
+```{r echo = FALSE}
+# Recursive Partitioning Plot
+rpart.plot(model_rpart[[10]], digits = 3)
+rpart.plot(model_rpart[[10]], digits = 3, fallen.leaves = TRUE,
+           type = 3, extra = 106)
+fancyRpartPlot(model_rpart[[10]], caption = NULL)
+```
 
 
 
