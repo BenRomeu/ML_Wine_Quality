@@ -9,8 +9,8 @@ ggcorrplot(corrmat)
 
 ####Boxplot of the variables####
 
-boxplot(wines_n[-12])
-
+boxplot(wines_n [-12],horizontal=FALSE,axes=TRUE,outline=FALSE,col=(c("gold","darkgreen")),
+        main="Boxplot of variables")
 
 #####Distribution of Good and Bad quality with 2 variables(alcohol and chlorides)####
 
