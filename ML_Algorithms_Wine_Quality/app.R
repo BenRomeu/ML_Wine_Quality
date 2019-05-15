@@ -13,6 +13,7 @@ rm(list = ls())
 
 # Load packages
 if(FALSE){
+  install.packages("shinythemes")
   install.packages("DT")
   install.packages("devtools")
   install.packages("RWeka")
@@ -57,6 +58,8 @@ library(C50)
 library(devtools)
   source_url('https://gist.githubusercontent.com/fawda123/7471137/raw/466c1474d0a505ff044412703516c34f1a4684a5/nnet_plot_update.r')
 library(shiny)
+library(shinythemes)
+  
 
   #### Load database of red wines and white wines ####
   load(paste(getwd(),"/data_set.RData", sep = ""), envir = parent.frame(), verbose = FALSE)
@@ -65,7 +68,7 @@ library(shiny)
 #### Shiny App
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
+ui <- fluidPage(theme = shinytheme("sandstone"),
    
    # Application title
    titlePanel("Machine Learning Algorithms - How To Predict Wine Quality"),
@@ -137,11 +140,6 @@ server <- function(input, output) {
             percent = T, print.auc = T, add=T,
             col="#4daf4a", lwd=2, print.auc.x=55, print.auc.y=55)
       }#END OF else if statement
-
-      
-      #roc(response = test_labels, predictor = rpart_prob , plot = T, 
-       #   percent = T, print.auc = T, add=T,
-        #  col="purple", lwd=2, print.auc.x=55, print.auc.y=45)
       
       #random forest
       roc(response = test_labels, predictor = predict(rf[[input$random_forest]], test, type = "prob")[,2] , plot = T, 
@@ -155,8 +153,8 @@ server <- function(input, output) {
        col="red",lwd = 2, print.auc.x=25, print.auc.y=55)
       
       legend("bottomright",
-             legend = c(paste("kNN (k = ",input$knn),"Classification Tree","RPART Tree", "Random Forest","ANN MLP"), 
-             col= c("dodgerblue3","#4daf4a","purple","orange", "red"), lwd=2)
+             legend = c(paste("kNN (k = ",input$knn),"Classification Tree", "Random Forest","ANN MLP"), 
+             col= c("dodgerblue3","#4daf4a","orange", "red"), lwd=2)
       
     })#end of output$MLcomparison
    
@@ -232,6 +230,85 @@ server <- function(input, output) {
                        main="Boxplot of variables")
              }#end of else if statement
            })#end of output$data_analysis
+   
+           output$Demonstration <- renderUI({
+     sidebarLayout(
+       sidebarPanel(
+         #########################################TEST DIFFERENT MODELS
+         h3("Test different models"),
+         p("Machine Learning models learn. But you can tell them how much to lear."),
+         strong("Here, you can try out different variations of our models."),
+         p(""),
+         
+         em("KNN"),
+         sliderInput("knn",
+                     "Number of groups",
+                     step = 1,
+                     min = 1,
+                     max = 80,
+                     value = 1),
+         
+         em("Decision Trees"),
+         sliderInput("decision_trees",
+                     "Number of trees",
+                     step = 1,
+                     min = 1,
+                     max = 40,
+                     value = 1),
+         radioButtons("rule",
+                      "RULE or NO RULE",
+                      inline = TRUE,
+                      choiceNames = c("RULE", "NO RULE"),
+                      choiceValues = c(TRUE, FALSE)),
+         
+         em("Random Forest"),
+         sliderInput("random_forest",
+                     "Number of random variables",
+                     step = 1,
+                     min = 1,
+                     max = 10,
+                     value = 1),
+         
+         em("ANN MLP"),
+         radioButtons("ANN_MLP",
+                      "Number of neurons",
+                      inline = TRUE,
+                      choices = c("1" = 1,"2" = 2, "3" = 3))
+       ),#end of sideBar Panel
+       
+       mainPanel(
+         h2("Data Analysis"),
+         p("This graph compares the efficiency of different models."),
+         strong("Twiggle the buttons to see how iterations have an impact on the final graph"),
+         plotOutput("MLcomparison"),
+         
+         #plotOutput("mytable_comparison"),
+         plotOutput("mytable"),
+         
+         
+         h2("Comparison bewteen models"),
+         h4("Most accurate models"),
+         p("The graph below shows the most accurate models."),
+         plotOutput("ML_most_accurate"),
+         
+         h4("kNN"),
+         p("The graph below shows different variations of kNN."),
+         plotOutput("knn"),
+         
+         h4("Decision trees"),
+         p("The graph below shows different variations of a decision tree."),
+         plotOutput("decision_trees"),
+         
+         h4("Random Forest"),
+         p("The graph below shows different variations of Random Forest"),
+         plotOutput("random_forest")
+         
+         #h4("ANN MLP"),
+         #p("The graph below shows different variations of ANN MLP"),
+         #plotOutput("ANN")
+       )# end of main panel
+     )# end of sidebar layout
+   })#end of output$Demonstration
            
            output$Data_Analysis = renderUI({
              sidebarLayout(
@@ -249,85 +326,6 @@ server <- function(input, output) {
              )#end of sidebarLayout
            })#end of Data_Analysis
            ### END OF DATA ANALYSIS ###
-           
-           output$Demonstration <- renderUI({
-               sidebarLayout(
-                 sidebarPanel(
-                   #########################################TEST DIFFERENT MODELS
-                   h3("Test different models"),
-                   p("Machine Learning models learn. But you can tell them how much to lear."),
-                   strong("Here, you can try out different variations of our models."),
-                   p(""),
-                   
-                   em("KNN"),
-                   sliderInput("knn",
-                               "Number of groups",
-                               step = 1,
-                               min = 1,
-                               max = 80,
-                               value = 1),
-                   
-                   em("Decision Trees"),
-                   sliderInput("decision_trees",
-                               "Number of trees",
-                               step = 1,
-                               min = 1,
-                               max = 40,
-                               value = 1),
-                   radioButtons("rule",
-                                "RULE or NO RULE",
-                                inline = TRUE,
-                                choiceNames = c("RULE", "NO RULE"),
-                                choiceValues = c(TRUE, FALSE)),
-                   
-                   em("Random Forest"),
-                   sliderInput("random_forest",
-                               "Number of random variables",
-                               step = 1,
-                               min = 1,
-                               max = 10,
-                               value = 1),
-                   
-                   em("ANN MLP"),
-                   radioButtons("ANN_MLP",
-                                "Number of neurons",
-                                inline = TRUE,
-                                choices = c("1" = 1,"2" = 2, "3" = 3))
-                 ),#end of sideBar Panel
-                 
-                 mainPanel(
-                   h2("Data Analysis"),
-                   p("This graph compares the efficiency of different models."),
-                   strong("Twiggle the buttons to see how iterations have an impact on the final graph"),
-                   plotOutput("MLcomparison"),
-                   
-                  #plotOutput("mytable_comparison"),
-                  plotOutput("mytable"),
-                   
-                   
-                   h2("Comparison bewteen models"),
-                   h4("Most accurate models"),
-                   p("The graph below shows the most accurate models."),
-                   plotOutput("ML_most_accurate"),
-                   
-                   h4("kNN"),
-                   p("The graph below shows different variations of kNN."),
-                   plotOutput("knn"),
-                   
-                   h4("Decision trees"),
-                   p("The graph below shows different variations of a decision tree."),
-                   plotOutput("decision_trees"),
-                   
-                   h4("Random Forest"),
-                   p("The graph below shows different variations of Random Forest"),
-                   plotOutput("random_forest")
-                   
-                   #h4("ANN MLP"),
-                   #p("The graph below shows different variations of ANN MLP"),
-                   #plotOutput("ANN")
-                 )# end of main panel
-               )# end of sidebar layout
-           })#end of output$Demonstration
            
            output$Model_Explanation <- renderUI({
              mainPanel(
