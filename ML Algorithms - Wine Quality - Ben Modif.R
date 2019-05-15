@@ -179,7 +179,7 @@ roc(response = test_labels, predictor = knn_FP_prob, plot = T, percent = T, prin
     col="#4daf4a", lwd=2, add=T, print.auc.y=40)
 roc(response = test_labels, predictor = knn_FN_prob , plot = T, percent = T, print.auc = T,
     col="orange", lwd=2, add=T, print.auc.y=30)
-legend("bottomright", legend = c(paste("Max Accuracy (k = ",knn_max_acc,")"),
+legend("bottomright", legend = c(paste("Max Accuracy (k = ",knn_max_acc_i,")"),
                                  paste("Min False Positive (k = ", knn_min_FP,")"),
                                  paste("Min False Negative (k = ", knn_min_FN,")")),
                                  col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
@@ -530,14 +530,15 @@ legend("bottomright",
 #-----------------------------------------------------------------------------------------------------
 #### Table Model Comparisons Results  ####
 
-results <- matrix(NA, nrow = 4, ncol = 4)
-colnames(results) <- c("kNN","Tree","RandomForest","ANN MLP")
+results <- matrix(NA, nrow = 4, ncol = 5)
+colnames(results) <- c("kNN","Tree (rule = TRUE)", "Tree (rule = FALSE)","RandomForest","ANN MLP")
 rownames(results) <- c("False Positive (Type I error)","False Negative (Type II error)",
                        "True Positive","True Negative")
 results
 
 (knn_comp <- knn_confmatrix[[knn_max_acc_i]])
 (tree_comp <- tree_confmatrix[[tree_max_acc_i]])
+(treeT_comp <- tree_confmatrix[[treeT_max_acc_i]])
 (rf_comp <- rf_confmatrix[[rf_max_acc_i]])
 
 results[1,1] <- knn_comp$table[1,2]
@@ -550,32 +551,38 @@ results[2,2] <- tree_comp$table[2,1]
 results[3,2] <- tree_comp$table[1,1]
 results[4,2] <- tree_comp$table[2,1]
 results
-results[1,3] <- rf_comp$table[1,2]
-results[2,3] <- rf_comp$table[2,1]
-results[3,3] <- rf_comp$table[1,1]
-results[4,3] <- rf_comp$table[2,1]
+results[1,3] <- treeT_comp$table[1,2]
+results[2,3] <- treeT_comp$table[2,1]
+results[3,3] <- treeT_comp$table[1,1]
+results[4,3] <- treeT_comp$table[2,1]
 results
-results <- as.data.frame((results))
+results[1,4] <- rf_comp$table[1,2]
+results[2,4] <- rf_comp$table[2,1]
+results[3,4] <- rf_comp$table[1,1]
+results[4,4] <- rf_comp$table[2,1]
+results
 
 # Statistics of Models
-results_s <- matrix(NA, nrow = 3, ncol = 4)
-colnames(results_s) <- c("kNN","Tree","RandomForest","ANN MLP")
+results_s <- matrix(NA, nrow = 3, ncol = 5)
+colnames(results_s) <- c("kNN","Tree (rule = FALSE)", "Tree (rule = TRUE)","RandomForest","ANN MLP")
 rownames(results_s) <- c("Accuracy","Sensitivity","Specificity")
 
 results_s[1,1] <- round(knn_comp$overall[1],3)
 results_s[2,1] <- round((knn_comp$table[1,1]/(knn_comp$table[1,1]+knn_comp$table[2,1])),3)
 results_s[3,1] <- round((knn_comp$table[2,2]/(knn_comp$table[2,2]+knn_comp$table[1,2])),3)
 
-results_s[1,2] <- round(tree_comp$overall[1],3)
-results_s[2,2] <- round((tree_comp$table[1,1]/(tree_comp$table[1,1]+tree_comp$table[2,1])),3)
-results_s[3,2] <- round((tree_comp$table[2,2]/(tree_comp$table[2,2]+tree_comp$table[1,2])),3)
+results_s[1,2] <- round(treeT_comp$overall[1],3)
+results_s[2,2] <- round((treeT_comp$table[1,1]/(treeT_comp$table[1,1]+treeT_comp$table[2,1])),3)
+results_s[3,2] <- round((treeT_comp$table[2,2]/(treeT_comp$table[2,2]+treeT_comp$table[1,2])),3)
 
-results_s[1,3] <- round(rf_comp$overall[1],3)
-results_s[2,3] <- round((rf_comp$table[1,1]/(rf_comp$table[1,1]+rf_comp$table[2,1])),3)
-results_s[3,3] <- round((rf_comp$table[2,2]/(rf_comp$table[2,2]+rf_comp$table[1,2])),3)
+results_s[1,3] <- round(tree_comp$overall[1],3)
+results_s[2,3] <- round((tree_comp$table[1,1]/(tree_comp$table[1,1]+tree_comp$table[2,1])),3)
+results_s[3,3] <- round((tree_comp$table[2,2]/(tree_comp$table[2,2]+tree_comp$table[1,2])),3)
+
+results_s[1,4] <- round(rf_comp$overall[1],3)
+results_s[2,4] <- round((rf_comp$table[1,1]/(rf_comp$table[1,1]+rf_comp$table[2,1])),3)
+results_s[3,4] <- round((rf_comp$table[2,2]/(rf_comp$table[2,2]+rf_comp$table[1,2])),3)
 results_s
-
-results_s <- as.data.frame((results_s))
 
 #----------------------------- DRAFT -----------------------------------------------------------
 

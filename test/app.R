@@ -8,21 +8,20 @@
 #
 
 library(shiny)
-library(DT)
-
+library(gridExtra)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   
-  DT::dataTableOutput("mytable")
-  
+  plotOutput("mytable")
+
    
   )
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
    
-  output$mytable = DT::renderDataTable({
+  output$mytable = renderPlot({
     
     (knn_comp <- knn_confmatrix[[5]])
     (tree_comp <- tree_confmatrix[[5]])
@@ -44,6 +43,8 @@ server <- function(input, output) {
     results[4,3] <- rf_comp$table[2,1]
     results
     results <- as.data.frame((results))
+    
+    grid.table(results)
   })#end of output$mytable
 }
 

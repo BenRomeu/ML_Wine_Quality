@@ -13,6 +13,7 @@ rm(list = ls())
 
 # Load packages
 if(FALSE){
+  install.packages("DT")
   install.packages("devtools")
   install.packages("RWeka")
   install.packages("rpart")
@@ -32,6 +33,7 @@ if(FALSE){
   install.packages("knitr")
 }#end of if statement
 
+library(ggplot2)
 library(knitr)
 library(ROCR)
 library(pROC)
@@ -57,7 +59,7 @@ library(devtools)
 library(shiny)
 
   #### Load database of red wines and white wines ####
-  load(paste(getwd(),"/data_set_new.RData", sep = ""), envir = parent.frame(), verbose = FALSE)
+  load(paste(getwd(),"/data_set.RData", sep = ""), envir = parent.frame(), verbose = FALSE)
 
 #-----------------------------------------------------------------------------------------------------
 #### Shiny App
@@ -69,9 +71,10 @@ ui <- fluidPage(
    titlePanel("Machine Learning Algorithms - How To Predict Wine Quality"),
    
    tabsetPanel(id = "tabSelected",
-               tabPanel("Data Analysis", uiOutput("Data_Analysis")),
+               tabPanel("Model Explanation", uiOutput("Model_Explanation")),
                tabPanel("Demonstration", uiOutput("Demonstration")),
-               tabPanel("Model Explanation", uiOutput("Model_Explanation"))
+               tabPanel("Data Analysis", uiOutput("Data_Analysis"))
+               
    )#end of tabsetPanel
    
 )# end of ui fluidpage
@@ -106,7 +109,7 @@ server <- function(input, output) {
       #    col="red",lwd = 2, print.auc.x=25, print.auc.y=47)
       
       legend("bottomright",
-             legend = c(paste("knn with k = ",knn_max_acc),"Classification Tree (rule = FALSE)",
+             legend = c(paste("knn with k = ",knn_max_acc_i),"Classification Tree (rule = FALSE)",
                         "Classification Tree (rule = TRUE)","Random Forest","ANN MLP"), 
              col= c("dodgerblue3","#4daf4a","green", "orange", "red"), lwd=2)
     })#end of output$ML_most_accurate
@@ -157,10 +160,6 @@ server <- function(input, output) {
       
     })#end of output$MLcomparison
    
-   output$decision_trees = renderPlot({})#end of output$decision_trees
-   
-   output$rule = renderPlot({})#end of output$rule
-   
    ########## START OF MODELS COMPARISONS #####
    output$knn = renderPlot({
      # ROC Curve (Receiver Operating Characteristic) & AUC
@@ -172,9 +171,9 @@ server <- function(input, output) {
          col="#4daf4a", lwd=2, add=T, print.auc.y=40)
      roc(response = test_labels, predictor = knn_FN_prob , plot = T, percent = T, print.auc = T,
          col="orange", lwd=2, add=T, print.auc.y=30)
-     legend("bottomright", legend = c(paste("Max Accuracy (k = ",knn_max_acc,")"),
-                                      paste("Min False Positive (k = ", knn_min_FP,")"),
-                                      paste("Min False Negative (k = ", knn_min_FN,")")),
+     legend("bottomright", legend = c(paste("Max Accuracy (k = ",knn_max_acc_i,")"),
+                                      paste("Min False Positive (k = ", knn_min_FP_i,")"),
+                                      paste("Min False Negative (k = ", knn_min_FN_i,")")),
             col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
    })#end of output$knn
    
@@ -302,11 +301,9 @@ server <- function(input, output) {
                    strong("Twiggle the buttons to see how iterations have an impact on the final graph"),
                    plotOutput("MLcomparison"),
                    
-                   fluidRow(
-                     column(12,
-                            tableOutput('table')
-                     )
-                   ),
+                  #plotOutput("mytable_comparison"),
+                  plotOutput("mytable"),
+                   
                    
                    h2("Comparison bewteen models"),
                    h4("Most accurate models"),
@@ -338,11 +335,20 @@ server <- function(input, output) {
              )#end of mainPanel
            })# end of output$Model_Explanation
            
-           output$mytable = DT::renderDataTable({
+           output$mytable = renderPlot({
+
+             #### model comparison
+             
+             results <- matrix(NA, nrow = 4, ncol = 5)
+             colnames(results) <- c("kNN","Tree (r = F)", "Tree (r = T)","RForest","ANN MLP")
+             rownames(results) <- c("FP (Type I error)","FN (Type II error)",
+                                    "True Positive","True Negative")
+             results
              
              (knn_comp <- knn_confmatrix[[input$knn]])
-             (tree_comp <- tree_confmatrix[[input$]])
-             (rf_comp <- rf_confmatrix[[input$]])
+             (tree_comp <- tree_confmatrix[[input$decision_trees]])
+             (treeT_comp <- treeT_confmatrix[[input$decision_trees]])
+             (rf_comp <- rf_confmatrix[[input$random_forest]])
              
              results[1,1] <- knn_comp$table[1,2]
              results[2,1] <- knn_comp$table[2,1]
@@ -354,12 +360,52 @@ server <- function(input, output) {
              results[3,2] <- tree_comp$table[1,1]
              results[4,2] <- tree_comp$table[2,1]
              results
-             results[1,3] <- rf_comp$table[1,2]
-             results[2,3] <- rf_comp$table[2,1]
-             results[3,3] <- rf_comp$table[1,1]
-             results[4,3] <- rf_comp$table[2,1]
+             results[1,3] <- treeT_comp$table[1,2]
+             results[2,3] <- treeT_comp$table[2,1]
+             results[3,3] <- treeT_comp$table[1,1]
+             results[4,3] <- treeT_comp$table[2,1]
              results
-             results <- as.data.frame((results))
+             results[1,4] <- rf_comp$table[1,2]
+             results[2,4] <- rf_comp$table[2,1]
+             results[3,4] <- rf_comp$table[1,1]
+             results[4,4] <- rf_comp$table[2,1]
+             results
+             
+             gc = tableGrob(results)
+             
+             ### statistics
+             
+             # Statistics of Models
+             results_s <- matrix(NA, nrow = 3, ncol = 5)
+             colnames(results_s) <- c("kNN","Tree (r = F)", "Tree (r = T)","RForest","ANN MLP")
+             rownames(results_s) <- c("Accuracy","Sensitivity","Specificity")
+             
+             results_s[1,1] <- round(knn_comp$overall[1],3)
+             results_s[2,1] <- round((knn_comp$table[1,1]/(knn_comp$table[1,1]+knn_comp$table[2,1])),3)
+             results_s[3,1] <- round((knn_comp$table[2,2]/(knn_comp$table[2,2]+knn_comp$table[1,2])),3)
+             
+             results_s[1,2] <- round(treeT_comp$overall[1],3)
+             results_s[2,2] <- round((treeT_comp$table[1,1]/(treeT_comp$table[1,1]+treeT_comp$table[2,1])),3)
+             results_s[3,2] <- round((treeT_comp$table[2,2]/(treeT_comp$table[2,2]+treeT_comp$table[1,2])),3)
+             
+             results_s[1,3] <- round(tree_comp$overall[1],3)
+             results_s[2,3] <- round((tree_comp$table[1,1]/(tree_comp$table[1,1]+tree_comp$table[2,1])),3)
+             results_s[3,3] <- round((tree_comp$table[2,2]/(tree_comp$table[2,2]+tree_comp$table[1,2])),3)
+             
+             results_s[1,4] <- round(rf_comp$overall[1],3)
+             results_s[2,4] <- round((rf_comp$table[1,1]/(rf_comp$table[1,1]+rf_comp$table[2,1])),3)
+             results_s[3,4] <- round((rf_comp$table[2,2]/(rf_comp$table[2,2]+rf_comp$table[1,2])),3)
+             results_s
+             
+             theme = ttheme_default(base_size = 18, base_colour = "black", base_family = "",
+                                    parse = FALSE)
+             
+             gs = tableGrob(results_s)
+
+             gc$widths <- unit(rep(1/ncol(gc), ncol(gc)), "npc")
+             gs$widths <- unit(rep(1/ncol(gs), ncol(gs)), "npc")
+             grid.arrange(gc,gs, ncol=1, newpage = FALSE)
+
            })#end of output$mytable
    
    ####****#### END OF TABS FUNCTIONS ####****####
