@@ -179,8 +179,10 @@ roc(response = test_labels, predictor = knn_FP_prob, plot = T, percent = T, prin
     col="#4daf4a", lwd=2, add=T, print.auc.y=40)
 roc(response = test_labels, predictor = knn_FN_prob , plot = T, percent = T, print.auc = T,
     col="orange", lwd=2, add=T, print.auc.y=30)
-legend("bottomright", legend = c("Max Accuracy", "Min False Positive", "Min False Negative"), 
-       col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
+legend("bottomright", legend = c(paste("Max Accuracy (k = ",knn_max_acc,")"),
+                                 paste("Min False Positive (k = ", knn_min_FP,")"),
+                                 paste("Min False Negative (k = ", knn_min_FN,")")),
+                                 col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
 
 # Improve Model Performance : z-score standardization
 wines_z <- as.data.frame(scale(wines[-12]))
@@ -230,33 +232,33 @@ for(i in 1:c){
 tree_FNFP
 
 # Compute most accurate / Min FP / Min FN
-(tree_max_acc <- min(which(tree_FNFP == max(tree_FNFP[,1]))))
-(tree_min_FP <- min(tree_FNFP[,2]))
-(tree_min_FP <- which(tree_FNFP==tree_min_FP, arr.ind=TRUE)[1])
-(tree_min_FN <- min(tree_FNFP[,3]))
-(tree_min_FN <- which(tree_FNFP==tree_min_FN, arr.ind=TRUE)[1])
+(tree_max_acc_i <- min(which(tree_FNFP == max(tree_FNFP[,1]))))
+(tree_min_FP_i <- min(tree_FNFP[,2]))
+(tree_min_FP_i <- which(tree_FNFP==tree_min_FP_i, arr.ind=TRUE)[1])
+(tree_min_FN_i <- min(tree_FNFP[,3]))
+(tree_min_FN_i <- which(tree_FNFP==tree_min_FN_i, arr.ind=TRUE)[1])
 
 # Compute predictions for most accurate / Min FP / Min FN models with Probabilities Output
-tree_max_acc <- predict(tree[[tree_max_acc]], test, type = "prob")
+tree_max_acc <- predict(tree[[tree_max_acc_i]], test, type = "prob")
 tree_max_acc <- tree_max_acc[,2]
-tree_min_FP <- predict(tree[[tree_min_FP]], test, type = "prob")
+tree_min_FP <- predict(tree[[tree_min_FP_i]], test, type = "prob")
 tree_min_FP <- tree_min_FP[,2]
-tree_min_FN <- predict(tree[[tree_min_FN]], test, type = "prob")
+tree_min_FN <- predict(tree[[tree_min_FN_i]], test, type = "prob")
 tree_min_FN <- tree_min_FN[,2]
 
 # ROC Curve (Receiver Operating Characteristic) & AUC
 par(pty="s")
 roc(response = test_labels, predictor = tree_max_acc , main=" Decision Trees with  variable Trials",
-    plot=T,legacy.axes=T,percent=T,print.auc=T,
+    plot=T,legacy.axes=T,percent=T,print.auc=T, 
     xlab="% False Positive", ylab="% True Positive", col="dodgerblue3",lwd = 2)
 roc(response = test_labels, predictor = tree_min_FP, plot = T, percent = T, print.auc = T,
     col="#4daf4a", lwd=2, add=T, print.auc.y=40)
 roc(response = test_labels, predictor = tree_min_FN , plot = T, percent = T, print.auc = T,
     col="orange", lwd=2, add=T, print.auc.y=30)
-legend("bottomright", legend = c("Max Accuracy", "Min False Positive", "Min False Negative"), 
-       col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
-
-
+legend("bottomright", legend = c(paste("Max Accuracy (n trees = ",tree_max_acc_i,")"),
+                                 paste("Min False Positive (n trees = ",tree_min_FP_i,")"),
+                                 paste("Min False Negative (n trees = ",tree_min_FN_i,")")), 
+                                  col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
 
 # Define if Classification Tree or Rule-based Tree
 rules <- TRUE#********* RULE = TRUE ******************

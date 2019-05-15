@@ -16,5 +16,3 @@ boxplot(wines_n [-12],horizontal=FALSE,axes=TRUE,outline=FALSE,col=(c("gold","da
 
 ggplot(aes(x=alcohol,y=chlorides, colour= label), data = wines_f) +
  stat_smooth(method=loess, fullrange=TRUE, alpha = 0.1, size =1.5 )
-
-

@@ -55,10 +55,9 @@ library(C50)
 library(devtools)
   source_url('https://gist.githubusercontent.com/fawda123/7471137/raw/466c1474d0a505ff044412703516c34f1a4684a5/nnet_plot_update.r')
 library(shiny)
-library(shinyjs)
 
   #### Load database of red wines and white wines ####
-  load(paste(getwd(),"/data_set.RData", sep = ""), envir = parent.frame(), verbose = FALSE)
+  load(paste(getwd(),"/data_set_new.RData", sep = ""), envir = parent.frame(), verbose = FALSE)
 
 #-----------------------------------------------------------------------------------------------------
 #### Shiny App
@@ -70,6 +69,7 @@ ui <- fluidPage(
    titlePanel("Machine Learning Algorithms - How To Predict Wine Quality"),
    
    tabsetPanel(id = "tabSelected",
+               tabPanel("Data Analysis", uiOutput("Data_Analysis")),
                tabPanel("Demonstration", uiOutput("Demonstration")),
                tabPanel("Model Explanation", uiOutput("Model_Explanation"))
    )#end of tabsetPanel
@@ -79,23 +79,37 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
-### DATA ANALYSIS ###
-    output$data_analysis = renderTable({#TODO: replace with actual data analysis from Donika
+    output$ML_most_accurate = renderPlot({
+      #### ROC & AUC Comparison between Models ####
+      #make the plot square
+      par(pty="s")
+      # Plot most accurate of kNN 
+      roc(response = test_labels,predictor=knn_max_acc_prob, plot = T,legacy.axes = T,percent=T,print.auc=T,
+          xlab="% False Positive", ylab="% True Positive", 
+          col="dodgerblue3",lwd = 2, print.auc.x=55, print.auc.y=55)
       
-      wines = input$dataSetChoice[,1]
-      print(wines)
+      # Plot most accurate of Classification trees
+            #rule == FALSE
+            roc(response = test_labels,predictor=tree_max_acc,plot = T,percent = T,print.auc = T, add=T,
+                col="#4daf4a", lwd=2, print.auc.x=55, print.auc.y=47)
+            #rule == TRUE
+            roc(response = test_labels,predictor=treeT_max_acc,plot = T,percent = T,print.auc = T, add=T,
+                col="green", lwd=2, print.auc.x=25, print.auc.y=47)
       
-      # Histogram of each features
-      par(mfrow=c(2,3))
-      for(i in 1:6) {
-        hist(wines[,i], main=names(wines)[i])
-      }
-      for(i in 7:12) {
-        hist(wines[,i], main=names(wines)[i])
-      }
-        #plot(input$dataSetChoice, ylim=c(0,100), xlim = c(0,100))
-    })#end of output$data_analysis
-
+      # Plot most accurate of Random Forest
+      roc(response = test_labels, predictor=rf_max_acc, plot = T,percent = T, print.auc = T, add=T,
+          col="orange", lwd=2, print.auc.x=25, print.auc.y=55)
+      
+      # Plot most accurate of AAN
+      #roc(response = test_labels, predictor = ANN_max_acc_prob, plot = T, 
+      #    percent = T, print.auc=T, add=T,
+      #    col="red",lwd = 2, print.auc.x=25, print.auc.y=47)
+      
+      legend("bottomright",
+             legend = c(paste("knn with k = ",knn_max_acc),"Classification Tree (rule = FALSE)",
+                        "Classification Tree (rule = TRUE)","Random Forest","ANN MLP"), 
+             col= c("dodgerblue3","#4daf4a","green", "orange", "red"), lwd=2)
+    })#end of output$ML_most_accurate
     
     output$MLcomparison = renderPlot({
 
@@ -110,9 +124,17 @@ server <- function(input, output) {
           col="dodgerblue3",lwd = 2, print.auc.x=55, print.auc.y=65)
       
       #decision trees
-      roc(response = test_labels, predictor = (predict(tree[[input$decision_trees]], test, type = "prob"))[,2] , plot = T, 
-         percent = T, print.auc = T, add=T,
-        col="#4daf4a", lwd=2, print.auc.x=55, print.auc.y=55)
+      if(input$rule == FALSE){
+        roc(response = test_labels, predictor = (predict(tree[[input$decision_trees]], test, type = "prob"))[,2] , plot = T, 
+            percent = T, print.auc = T, add=T,
+            col="#4daf4a", lwd=2, print.auc.x=55, print.auc.y=55)
+      }#end of if statement
+      else if(input$rule == TRUE){
+        roc(response = test_labels, predictor = (predict(treeT[[input$decision_trees]], test, type = "prob"))[,2] , plot = T, 
+            percent = T, print.auc = T, add=T,
+            col="#4daf4a", lwd=2, print.auc.x=55, print.auc.y=55)
+      }#END OF else if statement
+
       
       #roc(response = test_labels, predictor = rpart_prob , plot = T, 
        #   percent = T, print.auc = T, add=T,
@@ -134,106 +156,162 @@ server <- function(input, output) {
              col= c("dodgerblue3","#4daf4a","purple","orange", "red"), lwd=2)
       
     })#end of output$MLcomparison
-    
-    output$test = renderPlot({
-      plot(input$ANN_MLP)
-    })
-     
-   output$MLPplot <- renderPlot({
-      # generate bins based on input$bins from ui.R
-     
-     
-     # ANN MLP Model
-     model.mlp = neuralnet(label ~.,data = wines_n, hidden = 1, linear.output = FALSE)
-     
-      #alcohol <- seq(min(x), max(x), length.out = input$alcohol+1)
-      
-      # plot NN with the specified amount of alcohol
-      plot.nnet(model.mlp)
-   })#end of output$MLPplot
-   
-   output$my_wine_prediction = renderText({
-     
-     #assign user alcohol value (11th row) to first test element
-     test[1,11] = input$alcohol
-     model.mlp_prob <- predict(model.mlp, test[1,], type ="prob")[,2]
-     label = ifelse(model.mlp_prob>0.5,"Good", "Bad")
-     print(label)
-     
-   })#end of output$my_wine_prediction
    
    output$decision_trees = renderPlot({})#end of output$decision_trees
    
    output$rule = renderPlot({})#end of output$rule
    
-   output$knn = renderPlot({})#end of output$knn
+   ########## START OF MODELS COMPARISONS #####
+   output$knn = renderPlot({
+     # ROC Curve (Receiver Operating Characteristic) & AUC
+     par(pty="s")
+     roc(response = test_labels, predictor =  knn_max_acc_prob, main="kNN with variable k values",
+         plot=T,legacy.axes=T,percent=T,print.auc=T,
+         xlab="% False Positive", ylab="% True Positive", col="dodgerblue3",lwd = 2)
+     roc(response = test_labels, predictor = knn_FP_prob, plot = T, percent = T, print.auc = T,
+         col="#4daf4a", lwd=2, add=T, print.auc.y=40)
+     roc(response = test_labels, predictor = knn_FN_prob , plot = T, percent = T, print.auc = T,
+         col="orange", lwd=2, add=T, print.auc.y=30)
+     legend("bottomright", legend = c(paste("Max Accuracy (k = ",knn_max_acc,")"),
+                                      paste("Min False Positive (k = ", knn_min_FP,")"),
+                                      paste("Min False Negative (k = ", knn_min_FN,")")),
+            col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
+   })#end of output$knn
    
    output$random_forest = renderPlot({})#end of output$random_forest
+   
+   output$decision_trees = renderPlot({
+     # ROC Curve (Receiver Operating Characteristic) & AUC
+     par(pty="s")
+     roc(response = test_labels, predictor = tree_max_acc , main=" Decision Trees with  variable Trials",
+         plot=T,legacy.axes=T,percent=T,print.auc=T, 
+         xlab="% False Positive", ylab="% True Positive", col="dodgerblue3",lwd = 2)
+     roc(response = test_labels, predictor = tree_min_FP, plot = T, percent = T, print.auc = T,
+         col="#4daf4a", lwd=2, add=T, print.auc.y=40)
+     roc(response = test_labels, predictor = tree_min_FN , plot = T, percent = T, print.auc = T,
+         col="orange", lwd=2, add=T, print.auc.y=30)
+     legend("bottomright", legend = c(paste("Max Accuracy (n trees = ",tree_max_acc_i,")"),
+                                      paste("Min False Positive (n trees = ",tree_min_FP_i,")"),
+                                      paste("Min False Negative (n trees = ",tree_min_FN_i,")")), 
+            col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
+   })#end of output$decision_trees
+   ########## END OF MODELS COMPARISONS #####
    
    output$RPART = renderPlot({})#end of output$RPART
    
    output$ANN_MLP = renderPlot({})#end of output$ANN_MLP
    
-   output$Demonstration <- renderUI({
-       sidebarLayout(
-         sidebarPanel(
-           #########################################TEST DIFFERENT MODELS
-           h3("Test different models"),
-           p("Machine Learning models learn. But you can tell them how much to lear."),
-           strong("Here, you can try out different variations of our models."),
-           p(""),
-           
-           em("KNN"),
-           sliderInput("knn",
-                       "Number of groups",
-                       step = 1,
-                       min = 1,
-                       max = 80,
-                       value = 1),
-           
-           em("Decision Trees"),
-           sliderInput("decision_trees",
-                       "Number of trees",
-                       step = 1,
-                       min = 1,
-                       max = 40,
-                       value = 1),
-           radioButtons("rule",
-                        "RULE or NO RULE",
-                        inline = TRUE,
-                        choiceNames = c("RULE", "NO RULE"),
-                        choiceValues = c(TRUE, FALSE)),
-           
-           em("Random Forest"),
-           sliderInput("random_forest",
-                       "Number of random variables",
-                       step = 1,
-                       min = 1,
-                       max = 10,
-                       value = 1),
-           
-           em("ANN MLP"),
-           radioButtons("ANN_MLP",
-                        "Number of neurons",
-                        inline = TRUE,
-                        choices = c("1" = 1,"2" = 2, "3" = 3))
-         ),#end of sideBar Panel
-         
-         mainPanel(
-           h2("Data Analysis"),
-           p("This graph compares the efficiency of different models"),
-           plotOutput("MLcomparison")
-         )# end of main panel
-       )# end of sidebar layout
-   })#end of output$Demonstration
+   ####****#### TABS FUNCTIONS ####****####
    
-   output$Model_Explanation <- renderUI({
-     mainPanel(
-       #uiOutput('markdown')
-       HTML(markdown::markdownToHTML(knit('ML Model Explanation.rmd', quiet = TRUE)))
-     )#end of mainPanel
-   })# end of output$Model_Explanation
+           ### DATA ANALYSIS ###
+           output$data_analysis_graphs = renderPlot({
+        
+             if(input$data_visualization == 1){
+               #####Distribution of Good and Bad quality with 2 variables(alcohol and chlorides)####
+               ggplot(aes(x=alcohol,y=chlorides, colour= label), data = wines_f) +
+                 stat_smooth(method=loess, fullrange=TRUE, alpha = 0.1, size =1.5 )
+             }#end of if statement
+             else if(input$data_visualization == 2){
+               #### Correlation Matrix ####
+               # Check correlation for multicollinearity 
+               corrmat <- as.matrix(cor(wines[,1:12]))
+               ggcorrplot(corrmat)
+             }#end of else if statement
+             else if(input$data_visualization == 3){
+               ####Boxplot of the variables####
+               boxplot(wines_n [-12],horizontal=FALSE,axes=TRUE,outline=FALSE,col=(c("gold","darkgreen")),
+                       main="Boxplot of variables")
+             }#end of else if statement
+           })#end of output$data_analysis
+           
+           output$Data_Analysis = renderUI({
+             sidebarLayout(
+               sidebarPanel(
+                 radioButtons("data_visualization",
+                              "choose data visualizaton",
+                              inline = FALSE,
+                              choices = c("Good VS Bad in respect to alcohol and chlorides quantity" = 1,
+                                          "Correlations matrix between variables" = 2,
+                                          "Boxplot of variables" = 3))
+               ),#end of sideBar Panel
+               mainPanel(
+                 plotOutput("data_analysis_graphs")
+               )#end of main
+             )#end of sidebarLayout
+           })#end of Data_Analysis
+           ### END OF DATA ANALYSIS ###
+           
+           output$Demonstration <- renderUI({
+               sidebarLayout(
+                 sidebarPanel(
+                   #########################################TEST DIFFERENT MODELS
+                   h3("Test different models"),
+                   p("Machine Learning models learn. But you can tell them how much to lear."),
+                   strong("Here, you can try out different variations of our models."),
+                   p(""),
+                   
+                   em("KNN"),
+                   sliderInput("knn",
+                               "Number of groups",
+                               step = 1,
+                               min = 1,
+                               max = 80,
+                               value = 1),
+                   
+                   em("Decision Trees"),
+                   sliderInput("decision_trees",
+                               "Number of trees",
+                               step = 1,
+                               min = 1,
+                               max = 40,
+                               value = 1),
+                   radioButtons("rule",
+                                "RULE or NO RULE",
+                                inline = TRUE,
+                                choiceNames = c("RULE", "NO RULE"),
+                                choiceValues = c(TRUE, FALSE)),
+                   
+                   em("Random Forest"),
+                   sliderInput("random_forest",
+                               "Number of random variables",
+                               step = 1,
+                               min = 1,
+                               max = 10,
+                               value = 1),
+                   
+                   em("ANN MLP"),
+                   radioButtons("ANN_MLP",
+                                "Number of neurons",
+                                inline = TRUE,
+                                choices = c("1" = 1,"2" = 2, "3" = 3))
+                 ),#end of sideBar Panel
+                 
+                 mainPanel(
+                   h2("Data Analysis"),
+                   p("This graph compares the efficiency of different models."),
+                   strong("Twiggle the buttons to see how iterations have an impact on the final graph"),
+                   plotOutput("MLcomparison"),
+                   
+                   h2("Comparison bewteen models"),
+                   p("The graph below shows the most accurate models."),
+                   plotOutput("ML_most_accurate"),
+                   h3("kNN"),
+                   p("The graph below shows different variations of kNN."),
+                   plotOutput("knn"),
+                   h3("Decision trees"),
+                   p("The graph below shows different variations of a decision tree."),
+                   plotOutput("decision_trees")
+                 )# end of main panel
+               )# end of sidebar layout
+           })#end of output$Demonstration
+           
+           output$Model_Explanation <- renderUI({
+             mainPanel(
+               HTML(markdown::markdownToHTML(knit('ML Model Explanation.rmd', quiet = TRUE)))
+             )#end of mainPanel
+           })# end of output$Model_Explanation
    
+   ####****#### END OF TABS FUNCTIONS ####****####
 }#end of server
 # Run the application 
 shinyApp(ui = ui, server = server)
