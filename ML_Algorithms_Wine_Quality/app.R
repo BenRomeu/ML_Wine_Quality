@@ -84,6 +84,7 @@ ui <- fluidPage(theme = shinytheme("sandstone"),
    
 )# end of ui fluidpage
 
+######################################################## SERVER ##########################################################################
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
@@ -109,9 +110,9 @@ server <- function(input, output) {
           col="orange", lwd=2, print.auc.x=25, print.auc.y=55)
       
       # Plot most accurate of AAN
-      #roc(response = test_labels, predictor = ANN_max_acc_prob, plot = T, 
-      #    percent = T, print.auc=T, add=T,
-      #    col="red",lwd = 2, print.auc.x=25, print.auc.y=47)
+      roc(response = test_labels, predictor = predict(model.mlp[[3]], test, type = "prob")[,2], plot = T, 
+          percent = T, print.auc=T, add=T,
+          col="red",lwd = 2, print.auc.x=25, print.auc.y=63)
       
       legend("bottomright",
              legend = c(paste("knn (k = ",knn_max_acc_i,")"),"Classification Tree (rule = FALSE)",
@@ -236,12 +237,13 @@ server <- function(input, output) {
               (legend = "2")
             }#end of else if statement
           })#end of output$data_analysis_legend
+          
            output$Demonstration <- renderUI({
      sidebarLayout(
        sidebarPanel(
          ######################################### TEST DIFFERENT MODELS
          h3("Test different models"),
-         p("Machine Learning models learn. But you can tell them how much to lear."),
+         p("Machine Learning models learn. But you can tell them how much to learn."),
          strong("Here, you can try out different variations of our models."),
          
          
@@ -302,6 +304,7 @@ server <- function(input, output) {
          #plotOutput("mytable_comparison"),
          plotOutput("mytable"),
          
+         plotOutput("ANN_MLP"),
          
          h2("Comparison bewteen models"),
          h4("Most accurate models"),
@@ -337,8 +340,10 @@ server <- function(input, output) {
                                           "Boxplot of variables" = 2))
                ),#end of sideBar Panel
                mainPanel(
+                 includeHTML("data_analysis_INTRODUCTION.html"),
                  plotOutput("data_analysis_graphs"),
-                 textOutput("data_analysis_legend")
+                 includeHTML("data_analysis_DATA_ANALYSIS.html")
+                 #textOutput("data_analysis_legend")
                )#end of main
              )#end of sidebarLayout
            })#end of Data_Analysis
@@ -431,6 +436,10 @@ server <- function(input, output) {
              grid.arrange(gc,gs, ncol=1, newpage = FALSE)
 
            })#end of output$mytable
+           
+           output$ANN_MLP = renderPlot({
+             plot.nnet(model.mlp[[as.numeric(input$ANN_MLP)]])
+           })#end of output$ANN_MLP
    
    ####****#### END OF TABS FUNCTIONS ####****####
 }#end of server
