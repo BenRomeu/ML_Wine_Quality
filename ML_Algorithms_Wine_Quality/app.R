@@ -114,7 +114,7 @@ server <- function(input, output) {
       #    col="red",lwd = 2, print.auc.x=25, print.auc.y=47)
       
       legend("bottomright",
-             legend = c(paste("knn with k = ",knn_max_acc_i),"Classification Tree (rule = FALSE)",
+             legend = c(paste("knn (k = ",knn_max_acc_i,")"),"Classification Tree (rule = FALSE)",
                         "Classification Tree (rule = TRUE)","Random Forest","ANN MLP"), 
              col= c("dodgerblue3","#4daf4a","green", "orange", "red"), lwd=2)
     })#end of output$ML_most_accurate
@@ -155,7 +155,7 @@ server <- function(input, output) {
        col="red",lwd = 2, print.auc.x=25, print.auc.y=55)
       
       legend("bottomright",
-             legend = c(paste("kNN (k = ",input$knn),"Classification Tree", "Random Forest","ANN MLP"), 
+             legend = c(paste("kNN (k = ",input$knn,")"),"Classification Tree", "Random Forest","ANN MLP"), 
              col= c("dodgerblue3","#4daf4a","orange", "red"), lwd=2)
       
     })#end of output$MLcomparison
@@ -354,7 +354,7 @@ server <- function(input, output) {
              
              results <- matrix(NA, nrow = 4, ncol = 5)
              colnames(results) <- c("kNN","Tree (r = F)", "Tree (r = T)","RForest","ANN MLP")
-             rownames(results) <- c("FP (Type I error)","FN (Type II error)",
+             rownames(results) <- c("Type I error","Type II error",
                                     "True Positive","True Negative")
              results
              
