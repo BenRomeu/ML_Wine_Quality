@@ -206,6 +206,21 @@ server <- function(input, output) {
                                       paste("Min False Negative (n trees = ",tree_min_FN_i,")")), 
             col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
    })#end of output$decision_trees
+   
+   output$mlp = renderPlot({
+     # ROC Curve (Receiver Operating Characteristic) & AUC
+     par(pty="s")
+     roc(response = test_labels, predictor = predict(model.mlp[[3]], test, type = "prob")[,2], main="ANN",
+         plot=T,legacy.axes=T,percent=T,print.auc=F,
+         xlab="% False Positive", ylab="% True Positive", col="dodgerblue3",lwd = 2)
+     roc(response = test_labels, predictor = predict(model.mlp[[3]], test, type = "prob")[,2], plot = T, percent = T, print.auc = T,
+         col="dodgerblue3", lwd=2, add=T, print.auc.y=40)
+     roc(response = test_labels, predictor = predict(model.mlp[[2]], test, type = "prob")[,2], plot = T, percent = T, print.auc = T,
+         col="orange", lwd=2, add=T, print.auc.y=30)
+     legend("bottomright", legend = c("Max Accuracy", "Min False Positive", "Min False Negative"), 
+            col= c("dodgerblue3","dodgerblue3", "orange"), lwd=2)
+   })#end of output$mlp
+   
    ########## END OF MODELS COMPARISONS #####
    
    ####****#### TABS FUNCTIONS ####****####
@@ -305,25 +320,30 @@ server <- function(input, output) {
          plotOutput("ANN_MLP"),
          
          h2("Comparison bewteen models"),
-         h4("Most accurate models"),
+         h3("Most accurate models"),
          p("The graph below shows the most accurate models."),
          plotOutput("ML_most_accurate"),
          
-         h4("kNN"),
+         h3("kNN"),
          p("The graph below shows different variations of kNN."),
          plotOutput("knn"),
          
-         h4("Decision trees"),
+         h3("Decision trees"),
          p("The graph below shows different variations of a decision tree."),
          plotOutput("decision_trees"),
          
-         h4("Random Forest"),
+         h3("Random Forest"),
          p("The graph below shows different variations of Random Forest"),
-         plotOutput("random_forest")
+         plotOutput("random_forest"),
          
-         #h4("ANN MLP"),
-         #p("The graph below shows different variations of ANN MLP"),
-         #plotOutput("ANN")
+         h3("ANN MLP"),
+         p("The graph below shows different variations of ANN MLP"),
+         plotOutput("mlp"),
+         
+         h2("Conclusion"),
+         includeHTML("conclusion.html"),
+         p("")
+         
        )# end of main panel
      )# end of sidebar layout
    })#end of output$Demonstration

@@ -478,12 +478,12 @@ ANN_FN_prob <- attr(wines_ANN_pred[[ANN_min_FN]], "prob")
 
 # ROC Curve (Receiver Operating Characteristic) & AUC
 par(pty="s")
-roc(response = test_labels, predictor = predict(model.mlp[[ANN_max_acc_prob]], test, type = "prob")[,2], main="ANN",
+roc(response = test_labels, predictor = predict(model.mlp[[3]], test, type = "prob")[,2], main="ANN",
     plot=T,legacy.axes=T,percent=T,print.auc=T,
     xlab="% False Positive", ylab="% True Positive", col="dodgerblue3",lwd = 2)
-roc(response = test_labels, predictor = predict(model.mlp[[ANN_min_FP]], test, type = "prob")[,2], plot = T, percent = T, print.auc = T,
+roc(response = test_labels, predictor = predict(model.mlp[[2]], test, type = "prob")[,2], plot = T, percent = T, print.auc = T,
     col="#4daf4a", lwd=2, add=T, print.auc.y=40)
-roc(response = test_labels, predictor = predict(model.mlp[[ANN_min_FN]], test, type = "prob")[,2], plot = T, percent = T, print.auc = T,
+roc(response = test_labels, predictor = predict(model.mlp[[1]], test, type = "prob")[,2], plot = T, percent = T, print.auc = T,
     col="orange", lwd=2, add=T, print.auc.y=30)
 legend("bottomright", legend = c("Max Accuracy", "Min False Positive", "Min False Negative"), 
        col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
