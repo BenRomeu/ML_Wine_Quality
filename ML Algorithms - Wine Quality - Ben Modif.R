@@ -180,8 +180,8 @@ roc(response = test_labels, predictor = knn_FP_prob, plot = T, percent = T, prin
 roc(response = test_labels, predictor = knn_FN_prob , plot = T, percent = T, print.auc = T,
     col="orange", lwd=2, add=T, print.auc.y=30)
 legend("bottomright", legend = c(paste("Max Accuracy (k = ",knn_max_acc_i,")"),
-                                 paste("Min False Positive (k = ", knn_min_FP,")"),
-                                 paste("Min False Negative (k = ", knn_min_FN,")")),
+                                 paste("Min False Positive (k = ", knn_min_FP_i,")"),
+                                 paste("Min False Negative (k = ", knn_min_FN_i,")")),
                                  col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
 
 # Improve Model Performance : z-score standardization
