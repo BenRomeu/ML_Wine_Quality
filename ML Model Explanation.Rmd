@@ -41,7 +41,7 @@ The training algorithm for random forests applies the general technique of boots
 
 
 
-### Aritificial Nueral Network
+### Aritificial Neural Network
 
 An Artificial Neural Network (ANN) models the relationship between a set of input
 signals and an output signal using a model derived from our understanding of how
