@@ -242,6 +242,7 @@ server <- function(input, output) {
          strong("Here, you can try out different variations of our models."),
          p(""),
          
+         
          em("KNN"),
          sliderInput("knn",
                      "Number of groups",
