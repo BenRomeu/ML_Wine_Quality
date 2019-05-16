@@ -550,7 +550,7 @@ results[2,4] <- rf_comp$table[2,1]
 results[3,4] <- rf_comp$table[1,1]
 results[4,4] <- rf_comp$table[2,1]
 results
-results[1,5] <- ann_co$table[1,2]
+results[1,5] <- ann_comp$table[1,2]
 results[2,5] <- ann_comp$table[2,1]
 results[3,5] <- ann_comp$table[1,1]
 results[4,5] <- ann_comp$table[2,1]
