@@ -15,9 +15,9 @@ An algorithm, looking at one point on a grid, trying to determine if a point is 
 
 The k-nearest-neighbor is an example of a "lazy learner" algorithm because it does not generate a model of the data set beforehand. The only calculations it makes are when it is asked to poll the data point's neighbors. This makes k-nn very easy to implement for data mining.
 
-![](http://res.cloudinary.com/dyd911kmh/image/upload/f_auto,q_auto:best/v1531424125/KNN_final1_ibdm8a.png)
+Source: https://www.techopedia.com/definition/32066/k-nearest-neighbor-k-nn
 
-![](https://github.com/BenRomeu/ML_Wine_Quality/blob/master/knn_strength.PNG)
+![](http://res.cloudinary.com/dyd911kmh/image/upload/f_auto,q_auto:best/v1531424125/KNN_final1_ibdm8a.png)
 
 
 ### Decision Trees for classification
@@ -32,7 +32,7 @@ that denote the result of following a combination of decisions.
 
 ### Random Forest
 
-Random forests are an ensemble learning method for classification, regression and other tasks that operate by constructing a multitude of decision trees at training time and outputting the class that is the mode of the classes (classification) or mean prediction (regression) of the individual trees. Random decision forests correct for decision trees habit of overfitting to their training set.
+Random forests are an ensemble learning method for classification, regression and other tasks that operate by constructing a multitude of decision trees at training time and outputting the class that is the mode of the classes (classification) or mean prediction (regression) of the individual trees. Random decision forests correct for decision trees’ habit of overfitting to their training set.
 
 The training algorithm for random forests applies the general technique of bootstrap aggregating, or bagging, to tree learners. Given a training set X with responses Y, bagging repeatedly selects a random sample with replacement of the training set. After training, predictions for unseen samples can be made by averaging the predictions from all the individual regression trees or by taking the majority vote in the case of decision trees
 
