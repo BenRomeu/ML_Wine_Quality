@@ -210,13 +210,13 @@ server <- function(input, output) {
    output$ANN_MLP = renderPlot({})#end of output$ANN_MLP
    
    ####****#### TABS FUNCTIONS ####****####
-      
+   
            ### DATA ANALYSIS ###
-
            output$data_analysis_graphs = renderPlot({
              
              if(input$data_visualization == 1){
                #### Correlation Matrix ####
+               
                # Check correlation for multicollinearity 
                corrmat <- as.matrix(cor(wines[,1:12]))
                ggcorrplot(corrmat, title="Correlation matrix of variables")
@@ -282,7 +282,7 @@ server <- function(input, output) {
        ),#end of sideBar Panel
        
        mainPanel(
-         h2("Data Analysis"),
+         h2("Machine Learning Models Comparison"),
          
          p("A ROC curve is constructed by plotting the true positive rate (TPR) against the false positive rate (FPR). 
            The true positive rate is the proportion of observations that were correctly predicted to be positive out of 
