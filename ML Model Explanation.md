@@ -15,9 +15,11 @@ An algorithm, looking at one point on a grid, trying to determine if a point is 
 
 The k-nearest-neighbor is an example of a "lazy learner" algorithm because it does not generate a model of the data set beforehand. The only calculations it makes are when it is asked to poll the data point's neighbors. This makes k-nn very easy to implement for data mining.
 
-Source: https://www.techopedia.com/definition/32066/k-nearest-neighbor-k-nn
+![](knn_strength.PNG)
 
 ![](http://res.cloudinary.com/dyd911kmh/image/upload/f_auto,q_auto:best/v1531424125/KNN_final1_ibdm8a.png)
+
+[![](http://img.youtube.com/vi/HVXime0nQeI/0.jpg)](http://www.youtube.com/watch?v=HVXime0nQeI "")
 
 
 ### Decision Trees for classification
@@ -28,17 +30,24 @@ that indicate a decision to be made on an attribute. These split into branches
 that indicate the decision's choices. The tree is terminated by leaf nodes 
 that denote the result of following a combination of decisions.
 
+![](trees_strength.PNG)
+
 ![](https://datastudentblog.files.wordpress.com/2014/01/redwinedtree.png)
+
+[![](http://img.youtube.com/vi/7VeUPuFGJHk/0.jpg)](http://www.youtube.com/watch?v=7VeUPuFGJHk "")
+
 
 ### Random Forest
 
-Random forests are an ensemble learning method for classification, regression and other tasks that operate by constructing a multitude of decision trees at training time and outputting the class that is the mode of the classes (classification) or mean prediction (regression) of the individual trees. Random decision forests correct for decision trees’ habit of overfitting to their training set.
+Random forests are an ensemble learning method for classification, regression and other tasks that operate by constructing a multitude of decision trees at training time and outputting the class that is the mode of the classes (classification) or mean prediction (regression) of the individual trees. Random decision forests correct for decision trees habit of overfitting to their training set.
 
 The training algorithm for random forests applies the general technique of bootstrap aggregating, or bagging, to tree learners. Given a training set X with responses Y, bagging repeatedly selects a random sample with replacement of the training set. After training, predictions for unseen samples can be made by averaging the predictions from all the individual regression trees or by taking the majority vote in the case of decision trees
 
+![](rf_strength.PNG)
 
 ![](https://www.quantinsti.com/wp-content/uploads/2019/03/Random-Forest-Algorithm.jpg)
 
+[![](http://img.youtube.com/vi/J4Wdy0Wc_xQ/0.jpg)](http://www.youtube.com/watch?v=J4Wdy0Wc_xQ "")
 
 
 ### Aritificial Neural Network
@@ -49,9 +58,12 @@ a biological brain responds to stimuli from sensory inputs. Just as a brain uses
 network of interconnected cells called neurons to create a massive parallel processor,
 the ANN uses a network of artificial neurons or nodes to solve learning problems.
 
+![](aan_strength.PNG)
+
 ![](https://groupfuturista.com/blog/wp-content/uploads/2019/03/Artificial-Neural-Networks-Man-vs-Machine.jpeg)
 
 
+[![](http://img.youtube.com/vi/rEDzUT3ymw4/0.jpg)](http://www.youtube.com/watch?v=rEDzUT3ymw4 "")
 
 
 
