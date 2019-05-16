@@ -210,20 +210,21 @@ server <- function(input, output) {
    output$ANN_MLP = renderPlot({})#end of output$ANN_MLP
    
    ####****#### TABS FUNCTIONS ####****####
-   
+      
            ### DATA ANALYSIS ###
+
            output$data_analysis_graphs = renderPlot({
-        
+             
              if(input$data_visualization == 1){
                #### Correlation Matrix ####
                # Check correlation for multicollinearity 
                corrmat <- as.matrix(cor(wines[,1:12]))
-               ggcorrplot(corrmat)
+               ggcorrplot(corrmat, title="Correlation matrix of variables")
              }#end of else if statement
              else if(input$data_visualization == 2){
                ####Boxplot of the variables####
-               boxplot(wines_n [-12],horizontal=FALSE,axes=TRUE,outline=FALSE,col=(c("gold","darkgreen")),
-                       main="Boxplot of variables")
+               boxplot(wines_n [-12],horizontal=FALSE,axes=TRUE, las=2,outline=FALSE,col=(c("dodgerblue3")),
+                       main="Boxplot of variables (normalized)")
              }#end of else if statement
            })#end of output$data_analysis
    
@@ -235,15 +236,13 @@ server <- function(input, output) {
               (legend = "2")
             }#end of else if statement
           })#end of output$data_analysis_legend
-   
            output$Demonstration <- renderUI({
      sidebarLayout(
        sidebarPanel(
-         #########################################TEST DIFFERENT MODELS
+         ######################################### TEST DIFFERENT MODELS
          h3("Test different models"),
          p("Machine Learning models learn. But you can tell them how much to lear."),
          strong("Here, you can try out different variations of our models."),
-         p(""),
          
          
          em("KNN"),
@@ -332,9 +331,9 @@ server <- function(input, output) {
              sidebarLayout(
                sidebarPanel(
                  radioButtons("data_visualization",
-                              "choose data visualizaton",
+                              "Choose data visualization",
                               inline = FALSE,
-                              choices = c("Correlations matrix between variables" = 1,
+                              choices = c("Correlation matrix" = 1,
                                           "Boxplot of variables" = 2))
                ),#end of sideBar Panel
                mainPanel(
