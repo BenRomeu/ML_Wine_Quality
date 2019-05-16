@@ -280,7 +280,19 @@ server <- function(input, output) {
        
        mainPanel(
          h2("Data Analysis"),
-         p("This graph compares the efficiency of different models."),
+         
+         p("A ROC curve is constructed by plotting the true positive rate (TPR) against the false positive rate (FPR). 
+           The true positive rate is the proportion of observations that were correctly predicted to be positive out of 
+           all positive observations (TP/(TP + FN)). Similarly, the false positive rate is the proportion of observations 
+           that are incorrectly predicted to be positive out of all negative observations (FP/(TN + FP))."),
+         
+         p("The ROC curve shows the trade-off between sensitivity (or TPR) and specificity (1 – FPR). Classifiers that give
+           curves closer to the top-left corner indicate a better performance. As a baseline, a random classifier is expected 
+           to give points lying along the diagonal (FPR = TPR). The closer the curve comes to the 45-degree diagonal of the ROC
+           space, the less accurate the test."),
+         
+         p("AUC: Area Under the Curve"),
+         
          strong("Twiggle the buttons to see how iterations have an impact on the final graph"),
          plotOutput("MLcomparison"),
          

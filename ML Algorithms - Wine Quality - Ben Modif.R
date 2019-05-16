@@ -611,4 +611,3 @@ results[3,5] <- confaan$table[1,1]
 results[4,5] <- confaan$table[2,1]
 
 results <- as.data.frame(results)
-
