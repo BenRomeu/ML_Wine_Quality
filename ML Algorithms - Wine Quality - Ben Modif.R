@@ -61,20 +61,18 @@ head(wines)
 # Histogram of each features
 par(mfrow=c(2,3))
 for(i in 1:6) {
-  hist(wines[,i], main=names(wines)[i])
+  hist(wines[,i], main=names(wines)[i], col="dodgerblue3")
 }
 for(i in 7:12) {
-  hist(wines[,i], main=names(wines)[i])
+  hist(wines[,i], main=names(wines)[i], col="dodgerblue3")
 }
-
 
 #-----------------------------------------------------------------------------------------------------
 #### Correlation Matrix ####
 
 # Check correlation for multicollinearity 
 corrmat <- as.matrix(cor(wines[,1:12]))
-ggcorrplot(corrmat)
-
+ggcorrplot(corrmat, title = "Correlation Matrix")
 
 #-----------------------------------------------------------------------------------------------------
 #### Convert Quality into Factors : Bad / Good ####
