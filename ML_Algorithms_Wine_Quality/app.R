@@ -208,8 +208,6 @@ server <- function(input, output) {
    })#end of output$decision_trees
    ########## END OF MODELS COMPARISONS #####
    
-   output$ANN_MLP = renderPlot({})#end of output$ANN_MLP
-   
    ####****#### TABS FUNCTIONS ####****####
    
            ### DATA ANALYSIS ###
@@ -369,31 +367,32 @@ server <- function(input, output) {
              (tree_comp <- tree_confmatrix[[input$decision_trees]])
              (treeT_comp <- treeT_confmatrix[[input$decision_trees]])
              (rf_comp <- rf_confmatrix[[input$random_forest]])
+             (ann_comp = ANN_confmatrix[[as.numeric(input$ANN_MLP)]])
              
              results[1,1] <- knn_comp$table[1,2]
              results[2,1] <- knn_comp$table[2,1]
              results[3,1] <- knn_comp$table[1,1]
-             results[4,1] <- knn_comp$table[2,1]
+             results[4,1] <- knn_comp$table[2,2]
              results
              results[1,2] <- tree_comp$table[1,2]
              results[2,2] <- tree_comp$table[2,1]
              results[3,2] <- tree_comp$table[1,1]
-             results[4,2] <- tree_comp$table[2,1]
+             results[4,2] <- tree_comp$table[2,2]
              results
              results[1,3] <- treeT_comp$table[1,2]
              results[2,3] <- treeT_comp$table[2,1]
              results[3,3] <- treeT_comp$table[1,1]
-             results[4,3] <- treeT_comp$table[2,1]
+             results[4,3] <- treeT_comp$table[2,2]
              results
              results[1,4] <- rf_comp$table[1,2]
              results[2,4] <- rf_comp$table[2,1]
              results[3,4] <- rf_comp$table[1,1]
-             results[4,4] <- rf_comp$table[2,1]
+             results[4,4] <- rf_comp$table[2,2]
              results
              results[1,5] <- ann_comp$table[1,2]
              results[2,5] <- ann_comp$table[2,1]
              results[3,5] <- ann_comp$table[1,1]
-             results[4,5] <- ann_comp$table[2,1]
+             results[4,5] <- ann_comp$table[2,2]
              results
              
              gc = tableGrob(results)

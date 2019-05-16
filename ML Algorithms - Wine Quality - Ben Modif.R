@@ -438,14 +438,15 @@ model.mlp[[3]] = neuralnet(label ~.,data = wines_n, hidden = a, linear.output = 
 
 #plot ANN
 par(pty="s")
-plot.nnet(model.mlp[[1]])
+plot.nnet(model.mlp[[3]])
 plot(model.mlp[[3]])
 
 for(i in 1:a){
   wines_ANN_pred[[i]] <- predict(model.mlp[[i]], test, prob = T)
   wines_ANN_pred_classif[[i]] = as.factor(ifelse(wines_ANN_pred[[i]][,2]>0.5,"Good","Bad"))
-  classif = sapply(wines_ANN_pred_classif, function(x){as.character(x[1:(length(wines_ANN_pred_classif[[1]]))])})
-  ANN_confmatrix[[i]] <- confusionMatrix(as.factor(classif[1:(length(test_labels))]),reference = test_labels)
+  classif = sapply(wines_ANN_pred_classif[[i]], function(x){as.character(x[1:980])})
+  factor = as.factor(classif[1,])
+  ANN_confmatrix[[i]] <- confusionMatrix(factor,reference = test_labels)
   print(i)
 }#end of for loop
 
@@ -531,27 +532,27 @@ results
 results[1,1] <- knn_comp$table[1,2]
 results[2,1] <- knn_comp$table[2,1]
 results[3,1] <- knn_comp$table[1,1]
-results[4,1] <- knn_comp$table[2,1]
+results[4,1] <- knn_comp$table[2,2]
 results
 results[1,2] <- tree_comp$table[1,2]
 results[2,2] <- tree_comp$table[2,1]
 results[3,2] <- tree_comp$table[1,1]
-results[4,2] <- tree_comp$table[2,1]
+results[4,2] <- tree_comp$table[2,2]
 results
 results[1,3] <- treeT_comp$table[1,2]
 results[2,3] <- treeT_comp$table[2,1]
 results[3,3] <- treeT_comp$table[1,1]
-results[4,3] <- treeT_comp$table[2,1]
+results[4,3] <- treeT_comp$table[2,2]
 results
 results[1,4] <- rf_comp$table[1,2]
 results[2,4] <- rf_comp$table[2,1]
 results[3,4] <- rf_comp$table[1,1]
-results[4,4] <- rf_comp$table[2,1]
+results[4,4] <- rf_comp$table[2,2]
 results
 results[1,5] <- ann_comp$table[1,2]
 results[2,5] <- ann_comp$table[2,1]
 results[3,5] <- ann_comp$table[1,1]
-results[4,5] <- ann_comp$table[2,1]
+results[4,5] <- ann_comp$table[2,2]
 results
 
 # Statistics of Models
