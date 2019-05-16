@@ -1,0 +1,11 @@
+<h4>Data analysis :</h4>
+In order to implement machine learning models, we first need to analyse the structure of data and check for any possible adjustments. So, our dataset is composed of 11 numeric variables (excluding quality) which do not require any initial modifications. And the variable we aim to predict, quality, is a factor one. <br><br>
+
+Then, we checked the correlation matrix in order to detect inter-relation across variables. Several variables (    ) seem to be quite highly correlated (> |0.7|) which could imply a risk of heteroskedasticity. <br><br>
+But with further investigations (testing with and without them) it does not result in major changes of accuracy. So, we decided to keep all variables of the dataset for our analysis. <br><br>
+
+In addition, we checked for the distribution of our variables for comparison. To do so, we firstly had to normalize data with a simple formula which transform data into a range of 0 and 1. We arbitrarily decided to use the later formula instead of a standard normal normalization (which assign different weights). By plotting data with boxplot, we have a first idea of the distribution which some variables quite skewed. Normalization seems to have also reduce outliers. <br><br>
+
+<h4>Dataset partitioning:</h4>
+In order to train and test our ML models, we need to split our dataset in two parts. We have chosen to use 80% of data for the training part and 20% for testing. <br><br>
+We could have used cross-validation techniques to partition the two parts but for a simplification purpose we just split data by using the first 3918 observations. And 980 observations for testing the accuracy of our models.<br><br>
