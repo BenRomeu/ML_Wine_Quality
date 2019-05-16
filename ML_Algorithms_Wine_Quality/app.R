@@ -149,7 +149,6 @@ server <- function(input, output) {
           col="orange", lwd=2, print.auc.x=25, print.auc.y=65)
 
       #ANN MLPpredict
-      
       roc(response = test_labels, predictor = predict(model.mlp[[as.numeric(input$ANN_MLP)]], test, type = "prob")[,2], plot = T, 
          percent = T, print.auc=T, add=T,
        col="red",lwd = 2, print.auc.x=25, print.auc.y=55)
@@ -216,22 +215,26 @@ server <- function(input, output) {
            output$data_analysis_graphs = renderPlot({
         
              if(input$data_visualization == 1){
-               #####Distribution of Good and Bad quality with 2 variables(alcohol and chlorides)####
-               ggplot(aes(x=alcohol,y=chlorides, colour= label), data = wines_f) +
-                 stat_smooth(method=loess, fullrange=TRUE, alpha = 0.1, size =1.5 )
-             }#end of if statement
-             else if(input$data_visualization == 2){
                #### Correlation Matrix ####
                # Check correlation for multicollinearity 
                corrmat <- as.matrix(cor(wines[,1:12]))
                ggcorrplot(corrmat)
              }#end of else if statement
-             else if(input$data_visualization == 3){
+             else if(input$data_visualization == 2){
                ####Boxplot of the variables####
                boxplot(wines_n [-12],horizontal=FALSE,axes=TRUE,outline=FALSE,col=(c("gold","darkgreen")),
                        main="Boxplot of variables")
              }#end of else if statement
            })#end of output$data_analysis
+   
+          output$data_analysis_legend = renderText({
+            if(input$data_visualization == 1){
+              (legend = "1")
+            }#end of if statement
+            else if(input$data_visualization == 2){
+              (legend = "2")
+            }#end of else if statement
+          })#end of output$data_analysis_legend
    
            output$Demonstration <- renderUI({
      sidebarLayout(
@@ -331,12 +334,12 @@ server <- function(input, output) {
                  radioButtons("data_visualization",
                               "choose data visualizaton",
                               inline = FALSE,
-                              choices = c("Good VS Bad in respect to alcohol and chlorides quantity" = 1,
-                                          "Correlations matrix between variables" = 2,
-                                          "Boxplot of variables" = 3))
+                              choices = c("Correlations matrix between variables" = 1,
+                                          "Boxplot of variables" = 2))
                ),#end of sideBar Panel
                mainPanel(
-                 plotOutput("data_analysis_graphs")
+                 plotOutput("data_analysis_graphs"),
+                 textOutput("data_analysis_legend")
                )#end of main
              )#end of sidebarLayout
            })#end of Data_Analysis
@@ -383,6 +386,11 @@ server <- function(input, output) {
              results[3,4] <- rf_comp$table[1,1]
              results[4,4] <- rf_comp$table[2,1]
              results
+             results[1,5] <- ann_co$table[1,2]
+             results[2,5] <- ann_comp$table[2,1]
+             results[3,5] <- ann_comp$table[1,1]
+             results[4,5] <- ann_comp$table[2,1]
+             results
              
              gc = tableGrob(results)
              
@@ -408,6 +416,10 @@ server <- function(input, output) {
              results_s[1,4] <- round(rf_comp$overall[1],3)
              results_s[2,4] <- round((rf_comp$table[1,1]/(rf_comp$table[1,1]+rf_comp$table[2,1])),3)
              results_s[3,4] <- round((rf_comp$table[2,2]/(rf_comp$table[2,2]+rf_comp$table[1,2])),3)
+             
+             results_s[1,5] <- round(ann_comp$overall[1],3)
+             results_s[2,5] <- round((ann_comp$table[1,1]/(ann_comp$table[1,1]+ann_comp$table[2,1])),3)
+             results_s[3,5] <- round((ann_comp$table[2,2]/(ann_comp$table[2,2]+ann_comp$table[1,2])),3)
              results_s
              
              theme = ttheme_default(base_size = 18, base_colour = "black", base_family = "",

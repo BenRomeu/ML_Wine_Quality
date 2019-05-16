@@ -427,6 +427,7 @@ legend("bottomright", legend = c("Max Accuracy", "Min False Positive", "Min Fals
 model.mlp = list()
 wines_ANN_pred <- list()
 ANN_confmatrix <- list()
+wines_ANN_pred_classif = list()
 a=1
 print(a)
 model.mlp[[1]] = neuralnet(label ~.,data = wines_n, hidden = a, linear.output = FALSE)
@@ -440,28 +441,15 @@ model.mlp[[3]] = neuralnet(label ~.,data = wines_n, hidden = a, linear.output = 
 #plot ANN
 par(pty="s")
 plot.nnet(model.mlp[[1]])
-plot(model.mlp[[1]])
+plot(model.mlp[[3]])
 
-# Table predictions & accuracy
-#model.mlp.results <- predict(model.mlp[[1]], test[1:11])
-#model.mlp.predicted.label = ifelse(model.mlp.results[,2]>0.5,"Good","Bad")
-#model.mlp.predicted.label = data.frame(keyName=names(model.mlp.predicted.label), value=model.mlp.predicted.label, row.names=NULL)
-#confusionMatrix(model.mlp.predicted.label[,2], reference = test$label)
-
-#•model.mlp_prob <- predict(model.mlp[[1]], test, type ="prob")[,2]
-# ROC & AUC
-#roc(response = test_labels, predictor = model.mlp_prob, plot = T, legacy.axes = T, 
- #   percent = T, xlab="% False Positive", ylab="% True Positive", print.auc=T,
-#    col="red",lwd = 4)
-#legend("bottomright", legend = c("ANN MLP"), 
-#       col= c("red"), lwd=4)
-for(i in 2:a){
+for(i in 1:a){
+  wines_ANN_pred[[i]] <- predict(model.mlp[[i]], test, prob = T)
+  wines_ANN_pred_classif[[i]] = as.factor(ifelse(wines_ANN_pred[[i]][,2]>0.5,"Good","Bad"))
+  classif = sapply(wines_ANN_pred_classif, function(x){as.character(x[1:(length(wines_ANN_pred_classif[[1]]))])})
+  ANN_confmatrix[[i]] <- confusionMatrix(as.factor(classif[1:(length(test_labels))]),reference = test_labels)
   print(i)
-  wines_ANN_pred[[i]] <- predict(model.mlp[[i]], test, prob = F)
-#  model.mlp.predicted.label = ifelse(model.mlp.results[,2]>0.5,"Good","Bad")
-#  model.mlp.predicted.label = ifelse(wines_ANN_pred[[1]]>0.5,"Good","Bad")
-  ANN_confmatrix[[i]] <- confusionMatrix(wines_ANN_pred[[i]], reference = test_labels)
-}
+}#end of for loop
 
 # Create Matrix of results for all models
 ANN_FNFP <- matrix(NA, nrow = a, ncol = 3)
@@ -491,12 +479,12 @@ ANN_FN_prob <- attr(wines_ANN_pred[[ANN_min_FN]], "prob")
 
 # ROC Curve (Receiver Operating Characteristic) & AUC
 par(pty="s")
-roc(response = test_labels, predictor =  ANN_max_acc_prob, main="ANN with variable k values",
+roc(response = test_labels, predictor = predict(model.mlp[[ANN_max_acc_prob]], test, type = "prob")[,2], main="ANN",
     plot=T,legacy.axes=T,percent=T,print.auc=T,
     xlab="% False Positive", ylab="% True Positive", col="dodgerblue3",lwd = 2)
-roc(response = test_labels, predictor = ANN_FP_prob, plot = T, percent = T, print.auc = T,
+roc(response = test_labels, predictor = predict(model.mlp[[ANN_min_FP]], test, type = "prob")[,2], plot = T, percent = T, print.auc = T,
     col="#4daf4a", lwd=2, add=T, print.auc.y=40)
-roc(response = test_labels, predictor = ANN_FN_prob , plot = T, percent = T, print.auc = T,
+roc(response = test_labels, predictor = predict(model.mlp[[ANN_min_FN]], test, type = "prob")[,2], plot = T, percent = T, print.auc = T,
     col="orange", lwd=2, add=T, print.auc.y=30)
 legend("bottomright", legend = c("Max Accuracy", "Min False Positive", "Min False Negative"), 
        col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
@@ -540,6 +528,7 @@ results
 (tree_comp <- tree_confmatrix[[tree_max_acc_i]])
 (treeT_comp <- tree_confmatrix[[treeT_max_acc_i]])
 (rf_comp <- rf_confmatrix[[rf_max_acc_i]])
+(ann_comp = ANN_confmatrix[[ANN_max_acc]])
 
 results[1,1] <- knn_comp$table[1,2]
 results[2,1] <- knn_comp$table[2,1]
@@ -560,6 +549,11 @@ results[1,4] <- rf_comp$table[1,2]
 results[2,4] <- rf_comp$table[2,1]
 results[3,4] <- rf_comp$table[1,1]
 results[4,4] <- rf_comp$table[2,1]
+results
+results[1,5] <- ann_co$table[1,2]
+results[2,5] <- ann_comp$table[2,1]
+results[3,5] <- ann_comp$table[1,1]
+results[4,5] <- ann_comp$table[2,1]
 results
 
 # Statistics of Models
@@ -582,6 +576,11 @@ results_s[3,3] <- round((tree_comp$table[2,2]/(tree_comp$table[2,2]+tree_comp$ta
 results_s[1,4] <- round(rf_comp$overall[1],3)
 results_s[2,4] <- round((rf_comp$table[1,1]/(rf_comp$table[1,1]+rf_comp$table[2,1])),3)
 results_s[3,4] <- round((rf_comp$table[2,2]/(rf_comp$table[2,2]+rf_comp$table[1,2])),3)
+results_s
+
+results_s[1,5] <- round(ann_comp$overall[1],3)
+results_s[2,5] <- round((ann_comp$table[1,1]/(ann_comp$table[1,1]+ann_comp$table[2,1])),3)
+results_s[3,5] <- round((ann_comp$table[2,2]/(ann_comp$table[2,2]+ann_comp$table[1,2])),3)
 results_s
 
 #----------------------------- DRAFT -----------------------------------------------------------
@@ -611,3 +610,4 @@ results[3,5] <- confaan$table[1,1]
 results[4,5] <- confaan$table[2,1]
 
 results <- as.data.frame(results)
+
