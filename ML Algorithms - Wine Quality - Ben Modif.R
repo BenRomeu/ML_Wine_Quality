@@ -135,7 +135,7 @@ train_arg <- train[,1:11]
 test_arg <- test[,1:11]
 
 # kNN Model
-n <- 200
+n <- 80
 wines_knn_pred <- list()
 knn_confmatrix <- list()
 for(i in 1:n){
@@ -159,16 +159,16 @@ for(i in 1:n){
 knn_FNFP
 
 # Compute most accurate / Min FP / Min FN
-(knn_max_acc <- min(which(knn_FNFP == max(knn_FNFP[,1]))))
-(knn_min_FP <- min(knn_FNFP[,2]))
-(knn_min_FP <- which(knn_FNFP==knn_min_FP, arr.ind=TRUE)[1])
-(knn_min_FN <- min(knn_FNFP[,3]))
-(knn_min_FN <- which(knn_FNFP==knn_min_FN, arr.ind=TRUE)[1])
+(knn_max_acc_i <- min(which(knn_FNFP == max(knn_FNFP[,1]))))
+(knn_min_FP_i <- min(knn_FNFP[,2]))
+(knn_min_FP_i <- which(knn_FNFP==knn_min_FP_i, arr.ind=TRUE)[1])
+(knn_min_FN_i <- min(knn_FNFP[,3]))
+(knn_min_FN_i <- which(knn_FNFP==knn_min_FN_i, arr.ind=TRUE)[1])
 
 # ROC Curve for the three above models
-knn_max_acc_prob <- attr(wines_knn_pred[[knn_max_acc]], "prob")
-knn_FP_prob <- attr(wines_knn_pred[[knn_min_FP]], "prob")
-knn_FN_prob <- attr(wines_knn_pred[[knn_min_FN]], "prob")
+knn_max_acc_prob <- attr(wines_knn_pred[[knn_max_acc_i]], "prob")
+knn_FP_prob <- attr(wines_knn_pred[[knn_min_FP_i]], "prob")
+knn_FN_prob <- attr(wines_knn_pred[[knn_min_FN_i]], "prob")
 
 # ROC Curve (Receiver Operating Characteristic) & AUC
 par(pty="s")
@@ -179,8 +179,10 @@ roc(response = test_labels, predictor = knn_FP_prob, plot = T, percent = T, prin
     col="#4daf4a", lwd=2, add=T, print.auc.y=40)
 roc(response = test_labels, predictor = knn_FN_prob , plot = T, percent = T, print.auc = T,
     col="orange", lwd=2, add=T, print.auc.y=30)
-legend("bottomright", legend = c("Max Accuracy", "Min False Positive", "Min False Negative"), 
-       col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
+legend("bottomright", legend = c(paste("Max Accuracy (k = ",knn_max_acc_i,")"),
+                                 paste("Min False Positive (k = ", knn_min_FP,")"),
+                                 paste("Min False Negative (k = ", knn_min_FN,")")),
+                                 col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
 
 # Improve Model Performance : z-score standardization
 wines_z <- as.data.frame(scale(wines[-12]))
@@ -199,10 +201,10 @@ wines_knn_pred_z <- knn(train = train_z, test = test_z,
 #### Machine Learning Algorithm : Classification with Decision Trees ####
 
 # Define if Classification Tree or Rule-based Tree
-rules <- FALSE
+rules <- FALSE#********* RULE = FALSE ******************
 
 # C5.0 Algorithm : classification Tree or Rule-based Tree
-c <- 100
+c <- 40
 tree <- list()
 tree_pred <- list()
 tree_confmatrix <- list()
@@ -230,32 +232,91 @@ for(i in 1:c){
 tree_FNFP
 
 # Compute most accurate / Min FP / Min FN
-(tree_max_acc <- min(which(tree_FNFP == max(tree_FNFP[,1]))))
-(tree_min_FP <- min(tree_FNFP[,2]))
-(tree_min_FP <- which(tree_FNFP==tree_min_FP, arr.ind=TRUE)[1])
-(tree_min_FN <- min(tree_FNFP[,3]))
-(tree_min_FN <- which(tree_FNFP==tree_min_FN, arr.ind=TRUE)[1])
+(tree_max_acc_i <- min(which(tree_FNFP == max(tree_FNFP[,1]))))
+(tree_min_FP_i <- min(tree_FNFP[,2]))
+(tree_min_FP_i <- which(tree_FNFP==tree_min_FP_i, arr.ind=TRUE)[1])
+(tree_min_FN_i <- min(tree_FNFP[,3]))
+(tree_min_FN_i <- which(tree_FNFP==tree_min_FN_i, arr.ind=TRUE)[1])
 
 # Compute predictions for most accurate / Min FP / Min FN models with Probabilities Output
-tree_max_acc <- predict(tree[[tree_max_acc]], test, type = "prob")
+tree_max_acc <- predict(tree[[tree_max_acc_i]], test, type = "prob")
 tree_max_acc <- tree_max_acc[,2]
-tree_min_FP <- predict(tree[[tree_min_FP]], test, type = "prob")
+tree_min_FP <- predict(tree[[tree_min_FP_i]], test, type = "prob")
 tree_min_FP <- tree_min_FP[,2]
-tree_min_FN <- predict(tree[[tree_min_FN]], test, type = "prob")
+tree_min_FN <- predict(tree[[tree_min_FN_i]], test, type = "prob")
 tree_min_FN <- tree_min_FN[,2]
 
 # ROC Curve (Receiver Operating Characteristic) & AUC
 par(pty="s")
 roc(response = test_labels, predictor = tree_max_acc , main=" Decision Trees with  variable Trials",
-    plot=T,legacy.axes=T,percent=T,print.auc=T,
+    plot=T,legacy.axes=T,percent=T,print.auc=T, 
     xlab="% False Positive", ylab="% True Positive", col="dodgerblue3",lwd = 2)
 roc(response = test_labels, predictor = tree_min_FP, plot = T, percent = T, print.auc = T,
     col="#4daf4a", lwd=2, add=T, print.auc.y=40)
 roc(response = test_labels, predictor = tree_min_FN , plot = T, percent = T, print.auc = T,
     col="orange", lwd=2, add=T, print.auc.y=30)
+legend("bottomright", legend = c(paste("Max Accuracy (n trees = ",tree_max_acc_i,")"),
+                                 paste("Min False Positive (n trees = ",tree_min_FP_i,")"),
+                                 paste("Min False Negative (n trees = ",tree_min_FN_i,")")), 
+                                  col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
+
+# Define if Classification Tree or Rule-based Tree
+rules <- TRUE#********* RULE = TRUE ******************
+
+# C5.0 Algorithm : classification Tree or Rule-based Tree
+c <- 40
+treeT <- list()
+treeT_pred <- list()
+treeT_confmatrix <- list()
+for(i in 1:c){
+  print(i)
+  treeT[[i]] <- C5.0(train[-12], train$label, trials = i, weights = NULL, costs = NULL, rules = rules)
+  treeT_pred[[i]] <- predict(treeT[[i]], test, type = "class")
+  treeT_confmatrix[[i]] <- confusionMatrix(treeT_pred[[i]], reference = test_labels)
+}
+treeT_confmatrix[[1]]
+treeT_confmatrix[[10]]
+
+# Create Matrix of results for all models
+treeT_FNFP <- matrix(NA, nrow = c, ncol = 3)
+colnames(treeT_FNFP) <- c("Accuracy","FP (Type I error)","FN (Type II error)")
+for(i in 1:c){
+  treeT_FNFP[i,1] <- round(treeT_confmatrix[[i]]$overall[1],3)
+}
+for(i in 1:c){
+  treeT_FNFP[i,2] <- treeT_confmatrix[[i]]$table[1,2]
+}
+for(i in 1:c){
+  treeT_FNFP[i,3] <- treeT_confmatrix[[i]]$table[2,1]
+}
+treeT_FNFP
+
+# Compute most accurate / Min FP / Min FN
+(treeT_max_acc_i <- min(which(treeT_FNFP == max(treeT_FNFP[,1]))))
+(treeT_min_FP_i <- min(treeT_FNFP[,2]))
+(treeT_min_FP_i <- which(treeT_FNFP==treeT_min_FP_i, arr.ind=TRUE)[1])
+(treeT_min_FN_i <- min(treeT_FNFP[,3]))
+(treeT_min_FN_i <- which(treeT_FNFP==treeT_min_FN_i, arr.ind=TRUE)[1])
+
+# Compute predictions for most accurate / Min FP / Min FN models with Probabilities Output
+treeT_max_acc <- predict(treeT[[treeT_max_acc_i]], test, type = "prob")
+treeT_max_acc <- treeT_max_acc[,2]
+treeT_min_FP <- predict(treeT[[treeT_min_FP_i]], test, type = "prob")
+treeT_min_FP <- treeT_min_FP[,2]
+treeT_min_FN <- predict(treeT[[treeT_min_FN_i]], test, type = "prob")
+treeT_min_FN <- treeT_min_FN[,2]
+
+# ROC Curve (Receiver Operating Characteristic) & AUC
+par(pty="s")
+roc(response = test_labels, predictor = treeT_max_acc , main=" Decision Trees with  variable Trials",
+    plot=T,legacy.axes=T,percent=T,print.auc=T,
+    xlab="% False Positive", ylab="% True Positive", col="dodgerblue3",lwd = 2)
+roc(response = test_labels, predictor = treeT_min_FP, plot = T, percent = T, print.auc = T,
+    col="#4daf4a", lwd=2, add=T, print.auc.y=40)
+roc(response = test_labels, predictor = treeT_min_FN , plot = T, percent = T, print.auc = T,
+    col="orange", lwd=2, add=T, print.auc.y=30)
 legend("bottomright", legend = c("Max Accuracy", "Min False Positive", "Min False Negative"), 
        col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
-
 
 #-----------------------------------------------------------------------------------------------------
 #### Machine Learning Algorithm : Decision Trees : Recursive Partitioning ####
@@ -332,18 +393,18 @@ for(i in 1:r){
 rf_FNFP
 
 # Compute most accurate / Min FP / Min FN
-(rf_max_acc <- min(which(rf_FNFP == max(rf_FNFP[,1]))))
-(rf_min_FP <- min(rf_FNFP[,2]))
-(rf_min_FP <- min(which(rf_FNFP==rf_min_FP, arr.ind=TRUE)[1]))
-(rf_min_FN <- min(rf_FNFP[,3]))
-(rf_min_FN <- min(which(rf_FNFP==rf_min_FN, arr.ind=TRUE)[1]))
+(rf_max_acc_i <- min(which(rf_FNFP == max(rf_FNFP[,1]))))
+(rf_min_FP_i <- min(rf_FNFP[,2]))
+(rf_min_FP_i <- min(which(rf_FNFP==rf_min_FP_i, arr.ind=TRUE)[1]))
+(rf_min_FN_i <- min(rf_FNFP[,3]))
+(rf_min_FN_i <- min(which(rf_FNFP==rf_min_FN_i, arr.ind=TRUE)[1]))
 
 # Compute predictions for most accurate / Min FP / Min FN models with Probabilities Output
-rf_max_acc <- predict(rf[[rf_max_acc]], test, type = "prob")
+rf_max_acc <- predict(rf[[rf_max_acc_i]], test, type = "prob")
 rf_max_acc <- rf_max_acc[,2]
-rf_min_FP <- predict(rf[[rf_min_FP]], test, type = "prob")
+rf_min_FP <- predict(rf[[rf_min_FP_i]], test, type = "prob")
 rf_min_FP <- rf_min_FP[,2]
-rf_min_FN <- predict(rf[[rf_min_FN]], test, type = "prob")
+rf_min_FN <- predict(rf[[rf_min_FN_i]], test, type = "prob")
 rf_min_FN <- rf_min_FN[,2]
 
 # ROC Curve (Receiver Operating Characteristic) & AUC
@@ -364,15 +425,17 @@ legend("bottomright", legend = c("Max Accuracy", "Min False Positive", "Min Fals
 
 # ANN MLP Model
 model.mlp = list()
-a = 1;
-for(i in 1:1){
-  for(j in 0:0){
-    print(paste("i = ", i, "j = ", j))
-    if(j == 0){model.mlp[[a]] = neuralnet(label ~.,data = wines_n, hidden = i, linear.output = FALSE)}#end of if statement
-    else{model.mlp = neuralnet(label ~.,data = wines_n, hidden = c(i,j), linear.output = FALSE)}#end of else statement
-    a = a+1;#increment a
-  }#end of second for loop
-}#end of first for loop
+wines_ANN_pred <- list()
+ANN_confmatrix <- list()
+a=1
+print(a)
+model.mlp[[1]] = neuralnet(label ~.,data = wines_n, hidden = a, linear.output = FALSE)
+a = a+1
+print(a)
+model.mlp[[2]] = neuralnet(label ~.,data = wines_n, hidden = a, linear.output = FALSE)
+a = a+1
+print(a)
+model.mlp[[3]] = neuralnet(label ~.,data = wines_n, hidden = a, linear.output = FALSE)
 
 #plot ANN
 par(pty="s")
@@ -380,19 +443,63 @@ plot.nnet(model.mlp[[1]])
 plot(model.mlp[[1]])
 
 # Table predictions & accuracy
-model.mlp.results <- predict(model.mlp[[1]], test[1:11])
-model.mlp.predicted.label = ifelse(model.mlp.results[,2]>0.5,"Good","Bad")
-model.mlp.predicted.label = data.frame(keyName=names(model.mlp.predicted.label), value=model.mlp.predicted.label, row.names=NULL)
-confusionMatrix(model.mlp.predicted.label[,2], reference = test$label)
+#model.mlp.results <- predict(model.mlp[[1]], test[1:11])
+#model.mlp.predicted.label = ifelse(model.mlp.results[,2]>0.5,"Good","Bad")
+#model.mlp.predicted.label = data.frame(keyName=names(model.mlp.predicted.label), value=model.mlp.predicted.label, row.names=NULL)
+#confusionMatrix(model.mlp.predicted.label[,2], reference = test$label)
 
-model.mlp_prob <- predict(model.mlp, test, type ="prob")[,2]
+#•model.mlp_prob <- predict(model.mlp[[1]], test, type ="prob")[,2]
 # ROC & AUC
-roc(response = test_labels, predictor = model.mlp_prob, plot = T, legacy.axes = T, 
-    percent = T, xlab="% False Positive", ylab="% True Positive", print.auc=T,
-    col="red",lwd = 4)
-legend("bottomright", legend = c("ANN MLP"), 
-       col= c("red"), lwd=4)
+#roc(response = test_labels, predictor = model.mlp_prob, plot = T, legacy.axes = T, 
+ #   percent = T, xlab="% False Positive", ylab="% True Positive", print.auc=T,
+#    col="red",lwd = 4)
+#legend("bottomright", legend = c("ANN MLP"), 
+#       col= c("red"), lwd=4)
+for(i in 2:a){
+  print(i)
+  wines_ANN_pred[[i]] <- predict(model.mlp[[i]], test, prob = F)
+#  model.mlp.predicted.label = ifelse(model.mlp.results[,2]>0.5,"Good","Bad")
+#  model.mlp.predicted.label = ifelse(wines_ANN_pred[[1]]>0.5,"Good","Bad")
+  ANN_confmatrix[[i]] <- confusionMatrix(wines_ANN_pred[[i]], reference = test_labels)
+}
 
+# Create Matrix of results for all models
+ANN_FNFP <- matrix(NA, nrow = a, ncol = 3)
+colnames(ANN_FNFP) <- c("Accuracy","FP (Type I error)","FN (Type II error)")
+for(i in 1:a){
+  ANN_FNFP[i,1] <- round(ANN_confmatrix[[i]]$overall[1],3)
+}
+for(i in 1:a){
+  ANN_FNFP[i,2] <- ANN_confmatrix[[i]]$table[1,2]
+}
+for(i in 1:a){
+  ANN_FNFP[i,3] <- ANN_confmatrix[[i]]$table[2,1]
+}
+ANN_FNFP
+
+# Compute most accurate / Min FP / Min FN
+(ANN_max_acc <- min(which(ANN_FNFP == max(ANN_FNFP[,1]))))
+(ANN_min_FP <- min(ANN_FNFP[,2]))
+(ANN_min_FP <- which(ANN_FNFP==ANN_min_FP, arr.ind=TRUE)[1])
+(ANN_min_FN <- min(ANN_FNFP[,3]))
+(ANN_min_FN <- which(ANN_FNFP==ANN_min_FN, arr.ind=TRUE)[1])
+
+# ROC Curve for the three above models
+ANN_max_acc_prob <- attr(wines_ANN_pred[[ANN_max_acc]], "prob")
+ANN_FP_prob <- attr(wines_ANN_pred[[ANN_min_FP]], "prob")
+ANN_FN_prob <- attr(wines_ANN_pred[[ANN_min_FN]], "prob")
+
+# ROC Curve (Receiver Operating Characteristic) & AUC
+par(pty="s")
+roc(response = test_labels, predictor =  ANN_max_acc_prob, main="ANN with variable k values",
+    plot=T,legacy.axes=T,percent=T,print.auc=T,
+    xlab="% False Positive", ylab="% True Positive", col="dodgerblue3",lwd = 2)
+roc(response = test_labels, predictor = ANN_FP_prob, plot = T, percent = T, print.auc = T,
+    col="#4daf4a", lwd=2, add=T, print.auc.y=40)
+roc(response = test_labels, predictor = ANN_FN_prob , plot = T, percent = T, print.auc = T,
+    col="orange", lwd=2, add=T, print.auc.y=30)
+legend("bottomright", legend = c("Max Accuracy", "Min False Positive", "Min False Negative"), 
+       col= c("dodgerblue3","#4daf4a", "orange"), lwd=2)
 
 #-----------------------------------------------------------------------------------------------------
 #### ROC & AUC Comparison between Models ####
@@ -411,7 +518,7 @@ roc(response = test_labels, predictor=rf_max_acc, plot = T,percent = T, print.au
     col="orange", lwd=2, print.auc.x=25, print.auc.y=55)
 
 # Plot most accurate of AAN
-roc(response = test_labels, predictor = model.mlp_prob, plot = T, 
+roc(response = test_labels, predictor = ANN_max_acc_prob, plot = T, 
     percent = T, print.auc=T, add=T,
     col="red",lwd = 2, print.auc.x=25, print.auc.y=47)
 
@@ -423,15 +530,16 @@ legend("bottomright",
 #-----------------------------------------------------------------------------------------------------
 #### Table Model Comparisons Results  ####
 
-results <- matrix(NA, nrow = 4, ncol = 4)
-colnames(results) <- c("kNN","Tree","RandomForest","ANN MLP")
+results <- matrix(NA, nrow = 4, ncol = 5)
+colnames(results) <- c("kNN","Tree (rule = TRUE)", "Tree (rule = FALSE)","RandomForest","ANN MLP")
 rownames(results) <- c("False Positive (Type I error)","False Negative (Type II error)",
                        "True Positive","True Negative")
 results
 
-(knn_comp <- knn_confmatrix[[knn_max_acc]])
-(tree_comp <- tree_confmatrix[[tree_max_acc]])
-(rf_comp <- rf_confmatrix[[rf_max_acc]])
+(knn_comp <- knn_confmatrix[[knn_max_acc_i]])
+(tree_comp <- tree_confmatrix[[tree_max_acc_i]])
+(treeT_comp <- tree_confmatrix[[treeT_max_acc_i]])
+(rf_comp <- rf_confmatrix[[rf_max_acc_i]])
 
 results[1,1] <- knn_comp$table[1,2]
 results[2,1] <- knn_comp$table[2,1]
@@ -443,32 +551,38 @@ results[2,2] <- tree_comp$table[2,1]
 results[3,2] <- tree_comp$table[1,1]
 results[4,2] <- tree_comp$table[2,1]
 results
-results[1,3] <- rf_comp$table[1,2]
-results[2,3] <- rf_comp$table[2,1]
-results[3,3] <- rf_comp$table[1,1]
-results[4,3] <- rf_comp$table[2,1]
+results[1,3] <- treeT_comp$table[1,2]
+results[2,3] <- treeT_comp$table[2,1]
+results[3,3] <- treeT_comp$table[1,1]
+results[4,3] <- treeT_comp$table[2,1]
 results
-results <- as.data.frame((results))
+results[1,4] <- rf_comp$table[1,2]
+results[2,4] <- rf_comp$table[2,1]
+results[3,4] <- rf_comp$table[1,1]
+results[4,4] <- rf_comp$table[2,1]
+results
 
 # Statistics of Models
-results_s <- matrix(NA, nrow = 3, ncol = 4)
-colnames(results_s) <- c("kNN","Tree","RandomForest","ANN MLP")
+results_s <- matrix(NA, nrow = 3, ncol = 5)
+colnames(results_s) <- c("kNN","Tree (rule = FALSE)", "Tree (rule = TRUE)","RandomForest","ANN MLP")
 rownames(results_s) <- c("Accuracy","Sensitivity","Specificity")
 
 results_s[1,1] <- round(knn_comp$overall[1],3)
 results_s[2,1] <- round((knn_comp$table[1,1]/(knn_comp$table[1,1]+knn_comp$table[2,1])),3)
 results_s[3,1] <- round((knn_comp$table[2,2]/(knn_comp$table[2,2]+knn_comp$table[1,2])),3)
 
-results_s[1,2] <- round(tree_comp$overall[1],3)
-results_s[2,2] <- round((tree_comp$table[1,1]/(tree_comp$table[1,1]+tree_comp$table[2,1])),3)
-results_s[3,2] <- round((tree_comp$table[2,2]/(tree_comp$table[2,2]+tree_comp$table[1,2])),3)
+results_s[1,2] <- round(treeT_comp$overall[1],3)
+results_s[2,2] <- round((treeT_comp$table[1,1]/(treeT_comp$table[1,1]+treeT_comp$table[2,1])),3)
+results_s[3,2] <- round((treeT_comp$table[2,2]/(treeT_comp$table[2,2]+treeT_comp$table[1,2])),3)
 
-results_s[1,3] <- round(rf_comp$overall[1],3)
-results_s[2,3] <- round((rf_comp$table[1,1]/(rf_comp$table[1,1]+rf_comp$table[2,1])),3)
-results_s[3,3] <- round((rf_comp$table[2,2]/(rf_comp$table[2,2]+rf_comp$table[1,2])),3)
+results_s[1,3] <- round(tree_comp$overall[1],3)
+results_s[2,3] <- round((tree_comp$table[1,1]/(tree_comp$table[1,1]+tree_comp$table[2,1])),3)
+results_s[3,3] <- round((tree_comp$table[2,2]/(tree_comp$table[2,2]+tree_comp$table[1,2])),3)
+
+results_s[1,4] <- round(rf_comp$overall[1],3)
+results_s[2,4] <- round((rf_comp$table[1,1]/(rf_comp$table[1,1]+rf_comp$table[2,1])),3)
+results_s[3,4] <- round((rf_comp$table[2,2]/(rf_comp$table[2,2]+rf_comp$table[1,2])),3)
 results_s
-
-results_s <- as.data.frame((results_s))
 
 #----------------------------- DRAFT -----------------------------------------------------------
 
