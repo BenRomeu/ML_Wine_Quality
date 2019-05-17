@@ -32,6 +32,8 @@ if(FALSE){
   install.packages("ROCR")  
   install.packages("pROC")
   install.packages("knitr")
+  install.packages("GridExtra")
+  install.packages("grid")
 }#end of if statement
 
 library(ggplot2)
